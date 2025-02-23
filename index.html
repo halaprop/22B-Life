@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>22B Project 3</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.23.0/dist/css/uikit.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/uikit@3.23.0/dist/js/uikit.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* Ensure full viewport with sticky top and bottom bars */
+    body,
+    html {
+      margin: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: black;
+    }
+
+    #nav-bar,
+    #footer-bar {
+      background-color: #303030;
+    }
+
+    /* Main content area */
+    .main-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    /* The canvas itself respects its intrinsic size */
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Bar -->
+  <nav id="nav-bar" class="uk-navbar-container uk-navbar-sticky" uk-navbar>
+
+    <div class="uk-navbar-left uk-light">
+      <span class="uk-navbar-item uk-logo uk-margin-left">CIS 22B Project 2: Life</span>
+    </div>
+    <div class="uk-navbar-right">
+      <button class="uk-button uk-button-default uk-light" type="button" uk-toggle="target: #built-in-modal">Built-in
+        Figures</button>
+      <button class="uk-button uk-button-default uk-light" type="button" uk-toggle="target: #upload-modal">Upload
+        Figure</button>
+      <!-- <button class="uk-button uk-button-default uk-light uk-margin-right" type="button" uk-toggle="target: #fetch-modal">Fetch Figure</button> -->
+    </div>
+  </nav>
+
+  <!-- Centered Middle Div -->
+  <div class="main-container">
+    <canvas id="main-canvas"></canvas>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-bar" class="uk-flex uk-padding-small">
+    <button id="playback-btn" class="uk-button" style="min-width: 75px;"><i class="fa fa-play"></i></button>
+    <input id="timeout-slider" class="uk-range uk-margin-small-left" type="range" min="0" max="4" step="1" value="2"
+      style="width: 100px;">
+    <span id="iteration-counter" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;">Iteration: 121</span>
+    <span id="living-cells-counter" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;">Living cells:332</span>
+    </div>
+
+  <div id="built-in-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body">
+      <h2 class="uk-modal-title uk-text-center">Select a Built-in Figure</h2>
+
+      <!-- figures -->
+      <ul class="uk-list uk-list-divider uk-text-center" id="figure-list">
+        <li data-file="basic-figures.txt">Basic Figures</li>
+        <li data-file="burst.txt">Burst</li>
+        <li data-file="canada-goose.txt">Canada Goose</li>
+        <li data-file="glider-gun.txt">Glider Gun</li>
+        <li data-file="queen-bee.txt">Queen Bee</li>
+        <li data-file="rpent.txt">R-pent</li>
+        <li data-file="breeder1.cells">Gosper's Breeder</li>
+      </ul>
+
+      <div class="uk-modal-footer uk-text-right">
+        <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+        <button class="uk-button uk-button-primary" type="button" id="run-figure">Run</button>
+      </div>
+    </div>
+  </div>
+
+  <script defer type="module" src="./app.js"></script>
+</body>
+
+</html>
