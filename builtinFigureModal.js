@@ -70,7 +70,7 @@ export class BuiltInFigureModal {
       for (let col = 0; col < line.length; col++) {
         if (line[col] == 'O') {
           const key = row*colCount + col;
-          cells[key] = true;
+          cells.set(key, true);
         }
       }
     }
@@ -98,7 +98,7 @@ export class BuiltInFigureModal {
       for (let col = 0; col < line.length; col++) {
         if (line[col] == 'O') {
           const key = row*colCount + col;
-          cells[key] = true;
+          cells.set(key, true);
         }
       }
     }
