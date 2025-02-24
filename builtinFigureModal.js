@@ -1,5 +1,87 @@
 
 
+/*****************************************************************************/
+/*****************************************************************************/
+// LifeModel
+
+export class LifeModel {
+  constructor(params) {
+    this.rowOrigin = params.rowOrigin;
+    this.colOrigin = params.colOrigin;
+    this.rowCount = params.rowCount;
+    this.colCount = params.colCount;
+    this.cells = params.cells;
+  }
+
+  static modelFromString(string, format) {
+    let params;
+
+    if (format == 'txt') {
+      params = this.parse22B(string)
+    } else {
+     params = this.parseConwayWiki(string)
+    }
+    params.rowOrigin = 0;
+    params.colOrigin = 0;
+    return new LifeModel(params);
+  }
+
+  static parse22B(string) {
+    let lines = string.split('\n');
+    if (!lines.length) return;
+
+    const dims = lines[0].split(' ');
+    const rowCount = parseInt(dims[0]);
+    const colCount = parseInt(dims[1]);
+    const cells = new Map();
+
+    lines = lines.slice(1);
+
+    for (let row = 0; row < lines.length; row++) {
+      let line = lines[row];
+      for (let col = 0; col < line.length; col++) {
+        if (line[col] == 'O') {
+          const key = row * colCount + col;
+          cells.set(key, true);
+        }
+      }
+    }
+    return { rowCount, colCount, cells };
+  }
+
+  static parseConwayWiki(string) {
+    let lines = string.split('\n');
+    if (!lines.length) return;
+
+    // first pass gets rowCount and colCount
+    let rowCount = 0, colCount = 0;
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      if (line[0] == '!') continue;
+      rowCount++;
+      if (line.length > colCount) colCount = line.length;
+    }
+
+    const cells = new Map();
+
+    for (let row = 0; row < lines.length; row++) {
+      let line = lines[row];
+      if (line[0] == '!') continue;
+      for (let col = 0; col < line.length; col++) {
+        if (line[col] == 'O') {
+          const key = row * colCount + col;
+          cells.set(key, true);
+        }
+      }
+    }
+    return { rowCount, colCount, cells };
+  }
+
+}
+
+/*****************************************************************************/
+/*****************************************************************************/
+
 export class BuiltInFigureModal {
   // modalID must contain a <ul> with id #figure-list
   // modalID must contain button with id #run-figure
@@ -40,69 +122,19 @@ export class BuiltInFigureModal {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      const contents = await response.text();
-      const extension = filename.split('.').pop();
+      const string = await response.text();
+      const format = filename.split('.').pop();
 
       // produce an object that describes a Life state
       // { rowCount, colCount, cells: new Map() }
 
-      const model = (extension == 'txt') ? this.parseTxt(contents) : this.parseCells(contents);
+      const model = LifeModel.modelFromString(string, format);
+      // (extension == 'txt') ? this.parseTxt(contents) : this.parseCells(contents);
       return model;
 
     } catch (error) {
       console.error("Error fetching the file:", error);
     }
-  }
-
-  parseTxt(contents) {
-    let lines = contents.split('\n');
-    if (!lines.length) return;
-
-    const dims = lines[0].split(' ');
-    const rowCount = parseInt(dims[0]);
-    const colCount = parseInt(dims[1]);
-    const cells = new Map();
-
-    lines = lines.slice(1);
-
-    for (let row = 0; row < lines.length; row++) {
-      let line = lines[row];
-      for (let col = 0; col < line.length; col++) {
-        if (line[col] == 'O') {
-          const key = row*colCount + col;
-          cells.set(key, true);
-        }
-      }
-    }
-    return { rowCount, colCount, cells };
-  }
-
-  parseCells(contents) {
-    let lines = contents.split('\n');
-    if (!lines.length) return;
-
-    // first pass gets rowCount and colCount
-    let rowCount = 0, colCount = 0;
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-      if (line[0] == '!') continue;
-      rowCount++;
-      if (line.length > colCount) colCount = line.length;
-    }
-
-    const cells = new Map();
-
-    for (let row = 0; row < lines.length; row++) {
-      let line = lines[row];
-      if (line[0] == '!') continue;
-      for (let col = 0; col < line.length; col++) {
-        if (line[col] == 'O') {
-          const key = row*colCount + col;
-          cells.set(key, true);
-        }
-      }
-    }
-    return { rowCount, colCount, cells };
   }
 
 }

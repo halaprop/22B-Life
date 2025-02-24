@@ -25,7 +25,7 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
       rowCount: model.rowCount,
       colCount: model.colCount,
       // statusLineEl: document.getElementById('status-line'),
-      backgroundDots: true
+      backgroundDots: false
     };
     const grid = new ConsoleGrid(gridParams);
 
@@ -33,7 +33,7 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
     while (true) {
       drawLife(grid, model);
       model = await runWorker(worker, 'computeNext');
-      await sleep(20);
+      // await sleep(20);
     }
   } catch (error) {
     console.log(error);
