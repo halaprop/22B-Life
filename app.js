@@ -6,6 +6,8 @@ import { ConsoleGrid } from "./console.js";
 // for test
 import { Life } from "./life.js";
 
+// console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
+
 
 const canvasEl = document.getElementById("main-canvas");
 const iterationEl = document.getElementById("iteration-counter");
@@ -33,7 +35,7 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
     while (true) {
       drawLife(grid, model);
       model = await runWorker(worker, 'computeNext');
-      // await sleep(20);
+      await sleep(20);
     }
   } catch (error) {
     console.log(error);

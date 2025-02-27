@@ -24,6 +24,14 @@ export class Life {
     return inBounds ? this.cellValueAt(row, col) : 0;
   }
 
+  setCellValueAtKey(key, value) {
+    this.cells.set(key, value);
+  }
+
+  cellValueAtKey(key) {
+    return this.cells.get(key)
+  }
+
   nextLife() {
     const result = new Life({ rowCount: this.rowCount, colCount: this.colCount, cells: new Map() });
     for (let row = 0; row < this.rowCount; row++) {
@@ -49,7 +57,12 @@ export class Life {
 
   FAST_nextLife() {
     const result = new Life({ rowCount: this.rowCount, colCount: this.colCount, cells: new Map() });
-    const deadNeighbors = new Set();
+    const deadNeighbors = new Map();
+    const addOrIncrementDN = (row, col ) => {
+      const key = row * this.colCount + col;
+      const value = deadNeighbors.get(key) ?? 0;
+      deadNeighbors.set(key, value + 1);
+    }
 
     const offsets = [
       [-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]
@@ -68,7 +81,8 @@ export class Life {
         if (this.safeCellValueAt(neighborRow, neighborCol)) {
           liveNeighbors++;
         } else {
-          deadNeighbors.add([neighborRow, neighborCol])
+          //deadNeighbors.add([neighborRow, neighborCol])
+          addOrIncrementDN(neighborRow, neighborCol);
         }
       }
 
@@ -88,19 +102,11 @@ export class Life {
       }
     }
 
-    for (const [row, col] of deadNeighbors) {
-      let liveNeighbors = 0;
-      for (let offset of offsets) {
-        let neighborRow = row + offset[0];
-        let neighborCol = col + offset[1];
-        if (this.safeCellValueAt(neighborRow, neighborCol)) {
-          liveNeighbors++;
-        }
+    deadNeighbors.forEach((count, key) => {
+      if (count == 3) {
+        result.setCellValueAtKey(key, true);
       }
-      if (liveNeighbors == 3) {
-        result.setCellValueAt(row, col, true);
-      }
-    }
+    })
     return result;
   }
 
