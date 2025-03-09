@@ -19,6 +19,35 @@ const builtInFigureModal = new BuiltInFigureModal("#built-in-modal");
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// builtInFigureModal.runButton.addEventListener("click", async () => {
+//   try {
+//     let model = await builtInFigureModal.fetchAndParse();
+//     const gridParams = {
+//       canvas: canvasEl,
+//       rowCount: model.rowCount,
+//       colCount: model.colCount,
+//       // statusLineEl: document.getElementById('status-line'),
+//       backgroundDots: false
+//     };
+//     const grid = new ConsoleGrid(gridParams);
+
+//     await runWorker(worker, 'initialize', model);
+//     while (true) {
+//       drawLife(grid, model);
+//       model = await runWorker(worker, 'computeNext');
+//       await sleep(20);
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
+
+/*****************************************************************************/
+// Testing decomposed grid
+/*****************************************************************************/
+
+import { LifeModel } from "./grid.js";
+
 builtInFigureModal.runButton.addEventListener("click", async () => {
   try {
     let model = await builtInFigureModal.fetchAndParse();
@@ -30,15 +59,17 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
       backgroundDots: false
     };
     const grid = new ConsoleGrid(gridParams);
-
-    await runWorker(worker, 'initialize', model);
+    let lifeModel = LifeModel.createFrom(model.rowCount, model.colCount, model.cells);
     while (true) {
-      drawLife(grid, model);
-      model = await runWorker(worker, 'computeNext');
-      await sleep(20);
+      lifeModel.draw(grid);
+      lifeModel.transmitEdges();
+      lifeModel = lifeModel.nextModel();
+      await sleep(200);
     }
+
+
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 });
 
