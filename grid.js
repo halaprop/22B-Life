@@ -57,45 +57,24 @@ export class LifeModel {
     throw new Error(`col ${col} is out of bounds`);
   }
 
-  setCell(row, col, state) {
-    let submodel = this.findSubmodel(row, col);
-    submodel.setCell(row, col, state);
-  }
-
   getCell(row, col) {
     let submodel = this.findSubmodel(row, col);
     return submodel.getCell(row, col);
   }
 
-  transmitEdges() {
-    const edges = {};
-    // see Submodel internalEdges(). edges will be keyed with submodel index, and
-    // values are { leftEdge: [...bools for every row], rightEdge: [...bools for every row] } 
+  async computeNext() {
+    const edgePromises = this.submodels.map(submodel => {
+      return submodel.internalEdges();
+    });
+    const edges = await Promise.all(edgePromises);
 
-    const submodelsLength = this.submodels.length;
-    for (let i = 0; i < submodelsLength; i++) {
-      edges[i] = this.submodels[i].internalEdges();
-    }
+    const computePromises = this.submodels.map((submodel, i) => {
+      const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge || [] : [];
+      const externalRightEdge = (i < this.submodels.length-1) ? edges[i + 1].leftEdge || [] : [];
+      return submodel.computeNext({ externalLeftEdge, externalRightEdge });
+    });
 
-    for (let i = 0; i < submodelsLength; i++) {
-      let leftEdge = edges[i - 1]?.rightEdge || [];
-      let rightEdge = edges[i + 1]?.leftEdge || [];
-      if (leftEdge.length || rightEdge.length) {
-        this.submodels[i].setExternalEdges(leftEdge, rightEdge);
-      }
-    }
-  }
-
-  nextModel() {
-    let nextSubmodels = [];
-    this.transmitEdges();
-
-    for (let i = 0; i < this.submodels.length; i++) {
-      const submodel = this.submodels[i];
-      const nextSubmodel = submodel.nextSubmodel();
-      nextSubmodels.push(nextSubmodel);
-    }
-    return new LifeModel(this.rowCount, this.colCount, nextSubmodels);
+    return Promise.all(computePromises);
   }
 
 }
@@ -153,25 +132,28 @@ class SubModel {
     return result;
   }
 
-  setExternalEdges(externalLeftEdge, externalRightEdge) {
-    for (let row = this.row; row < this.row + this.rowCount; row++) {
-      this.setCell(row, this.col - 1, externalLeftEdge[row]);
-      this.setCell(row, this.col + this.colCount, externalRightEdge[row]);
-    }
-  }
 
-  nextSubmodel(externalLeftEdge, externalRightEdge) {
-    const result = new SubModel(this.row, this.col, this.rowCount, this.colCount, this.parentColCount);
+  computeNext(externalEdges) {
+    const nextCells = new Set();
+
+    for (let row = this.row; row < this.row + this.rowCount; row++) {
+      this.setCell(row, this.col - 1, externalEdges.externalLeftEdge[row]);
+      this.setCell(row, this.col + this.colCount, externalEdges.externalRightEdge[row]);
+    }
 
     for (let row = this.row; row < this.row + this.rowCount; row++) {
       for (let col = this.col; col < this.col + this.colCount; col++) {
         const value = this.getCell(row, col);
         const liveNeighbors = this.livingNeighbors(row, col);
+
         const nextValue = (liveNeighbors == 3) || (value && liveNeighbors == 2);
-        result.setCell(row, col, nextValue);
+        if (nextValue) {
+          const key = row * this.parentColCount + col;
+          nextCells.add(key)
+        }
       }
     }
-    return result;
+    this.cells = nextCells;
   }
 
   livingNeighbors(row, col) {

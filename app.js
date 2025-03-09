@@ -48,6 +48,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 import { LifeModel } from "./grid.js";
 
+console.log("hw concurrency", navigator.hardwareConcurrency || 1);
+
 builtInFigureModal.runButton.addEventListener("click", async () => {
   try {
     let model = await builtInFigureModal.fetchAndParse();
@@ -62,8 +64,7 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
     let lifeModel = LifeModel.createFrom(model.rowCount, model.colCount, model.cells);
     while (true) {
       lifeModel.draw(grid);
-      lifeModel.transmitEdges();
-      lifeModel = lifeModel.nextModel();
+      await lifeModel.computeNext();
       await sleep(200);
     }
 
