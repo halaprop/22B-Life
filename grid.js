@@ -1,5 +1,55 @@
 const kMaxSubmodels = 8;
 
+
+export class MyClassProxy {
+  constructor(workerScript = './worker-bee.js') {
+    this.worker = new Worker(workerScript, { type: 'module' });
+  }
+
+  sendMessage(command, params) {
+    return new Promise((resolve, reject) => {
+      const handleMessage = (event) => {
+        const data = event.data;
+        if (data.status === 'ok') {
+          resolve(data.result || data);
+        } else {
+          reject(data.error);
+        }
+        this.worker.removeEventListener('message', handleMessage);
+      };
+
+      this.worker.addEventListener('message', handleMessage);
+      this.worker.postMessage({ command, params });
+    });
+  }
+
+  async create(params) {
+    return this.sendMessage('create', params);
+  }
+
+  async compute(params) {
+    return this.sendMessage('compute', params);
+  }
+}
+
+const proxy = new MyClassProxy();
+
+async function run() {
+  try {
+    const createResult = await proxy.create({ value: 10 });
+    console.log('createResult', createResult);
+
+    const computeResult = await proxy.compute({ value: 5 });
+    console.log('computeResult', computeResult);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+run();
+
+
+
 export class LifeModel {
   constructor(rowCount, colCount, sourceMap) {
     this.rowCount = rowCount;
@@ -40,7 +90,8 @@ export class LifeModel {
       allCells.push(cells);
 
       // submodel params are { row, col, rowCount, colCount, parentColCount, cells }
-      const submodel = new SubModel(0, subCol, rowCount, subColCount, colCount, cells);
+      const params = { row: 0, col: subCol, rowCount, colCount: subColCount, parentColCount: colCount, cells }
+      const submodel = new SubModel(params);
       submodels.push(submodel);
       subCol += subColCount;
     }
@@ -79,13 +130,8 @@ export class LifeModel {
 }
 
 class SubModel {
-  constructor(row, col, rowCount, colCount, parentColCount, cells) {
-    this.row = row;
-    this.col = col;
-    this.rowCount = rowCount;
-    this.colCount = colCount;
-    this.parentColCount = parentColCount;
-    this.cells = cells;
+  constructor(params) {
+    Object.assign(this, params);
   }
 
   key(row, col) {
