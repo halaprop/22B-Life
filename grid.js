@@ -6,73 +6,74 @@ export class LifeModel {
     this.colCount = colCount;
 
     const submodelCount = Math.min(kMaxSubmodels, Math.ceil(colCount / 10));
-    let width = Math.floor(colCount / submodelCount);
+    const width = Math.floor(colCount / submodelCount);
     let remainder = colCount % submodelCount;
 
-    let submodels = [];
+    const submodels = [];
+    const allCells = [];
+    const allInternalEdges = [];
+
     let subCol = 0;
 
     for (let i = 0; i < submodelCount; i++) {
       const subColCount = width + (remainder > 0 ? 1 : 0);
       remainder--;
       const cells = new Set();
+      const leftEdge = [];
+      const rightEdge = [];
       for (let row = 0; row < rowCount; row++) {
         for (let col = subCol; col < subCol + subColCount; col++) {
           const key = row * colCount + col;
-          const sourceValue = sourceMap.get(key);
-          if (sourceMap.get(key)) {
+          const value = sourceMap.get(key);
+          if (value) {
             cells.add(key);
+          }
+          if (col == subCol) {
+            leftEdge.push(value);
+          }
+          if (col == subCol + subColCount - 1) {
+            rightEdge.push(value);
           }
         }
       }
+      allInternalEdges.push({ leftEdge, rightEdge });
+      allCells.push(cells);
+
       // submodel params are { row, col, rowCount, colCount, parentColCount, cells }
       const submodel = new SubModel(0, subCol, rowCount, subColCount, colCount, cells);
       submodels.push(submodel);
       subCol += subColCount;
     }
+    this.allInternalEdges = allInternalEdges;
+    this.allCells = allCells;
     this.submodels = submodels;
   }
 
   draw(grid) {
+    grid.eraseAll();
     let totalLiving = 0;
-    for (let row = 0; row < this.rowCount; row++) {
-      for (let col = 0; col < this.colCount; col++) {
-        const value = this.getCell(row, col);
-        const glyph = value ? '#' : ' ';
-        if (value) totalLiving++;
-        grid.drawCharAt(row, col, glyph, 'white');
+    for (const cells of this.allCells) {
+      for (const key of cells) {
+        totalLiving++;
+        const row = Math.floor(key / this.colCount);
+        const col = key % this.colCount;
+        grid.drawCharAt(row, col, '#');
       }
-    };
+    }
     return totalLiving;
   }
 
-  findSubmodel(row, col) {
-    for (let submodel of this.submodels) {
-      if (col >= submodel.col && col < submodel.col + submodel.colCount) {
-        return submodel;
-      }
-    }
-    throw new Error(`col ${col} is out of bounds`);
-  }
-
-  getCell(row, col) {
-    let submodel = this.findSubmodel(row, col);
-    return submodel.getCell(row, col);
-  }
-
   async computeNext() {
-    const edgePromises = this.submodels.map(submodel => {
-      return submodel.internalEdges();
-    });
-    const edges = await Promise.all(edgePromises);
-
+    const edges = this.allInternalEdges;
     const computePromises = this.submodels.map((submodel, i) => {
-      const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge || [] : [];
-      const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge || [] : [];
+      const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge : [];
+      const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge : [];
       return submodel.computeNext({ externalLeftEdge, externalRightEdge });
     });
 
-    return Promise.all(computePromises);
+    const result = await Promise.all(computePromises);
+    this.allCells = result.map(obj => obj.cells);
+    this.allInternalEdges = result.map(obj => obj.internalEdges);
   }
 
 }
@@ -93,51 +94,26 @@ class SubModel {
 
   setCell(row, col, state) {
     const key = this.key(row, col);
-    this.setCellWithKey(key, state);
+    state ? this.cells.add(key) : this.cells.delete(key);
   }
 
   getCell(row, col) {
     const key = this.key(row, col);
-    return this.getCellWithKey(key);
-  }
-
-  setCellWithKey(key, state) {
-    state ? this.cells.add(key) : this.cells.delete(key);
-  }
-
-  getCellWithKey(key) {
     return this.cells.has(key);
   }
 
-  internalEdges() {
-    // returns { leftEdge: [...bools for every row], rightEdge: [...bools for every row] } 
-    // omits leftEdge for the leftmost submodel and rightEdge for the rightmost
-    const result = {};
-    if (this.col > 0) result.leftEdge = [];
-    if (this.col + this.colCount < this.parentColCount) result.rightEdge = [];
-
-    for (let row = this.row; row < this.row + this.rowCount; row++) {
-      if (result.leftEdge) {
-        const value = this.getCell(row, this.col);
-        result.leftEdge.push(value);
-      }
-      if (result.rightEdge) {
-        const value = this.getCell(row, this.col + this.colCount - 1);
-        result.rightEdge.push(value);
-      }
-    }
-    return result;
-  }
-
-
+  // receive external edges and return cells and internal edges
+  // externalEdges is { externalLeftEdge: [bools], externalRightEdge: [bools] }
+  // return { cells: {set of true indexes }, { leftEdge: [bools], rightEdge: [bools] }  };
   computeNext(externalEdges) {
-    const nextCells = new Set();
+    const cells = new Set();
 
     for (let row = this.row; row < this.row + this.rowCount; row++) {
       this.setCell(row, this.col - 1, externalEdges.externalLeftEdge[row]);
       this.setCell(row, this.col + this.colCount, externalEdges.externalRightEdge[row]);
     }
 
+    const internalEdges = { leftEdge: [], rightEdge: [] };
     for (let row = this.row; row < this.row + this.rowCount; row++) {
       for (let col = this.col; col < this.col + this.colCount; col++) {
         const value = this.getCell(row, col);
@@ -146,11 +122,18 @@ class SubModel {
         const nextValue = (liveNeighbors == 3) || (value && liveNeighbors == 2);
         if (nextValue) {
           const key = row * this.parentColCount + col;
-          nextCells.add(key)
+          cells.add(key)
+        }
+        if (col == this.col) {
+          internalEdges.leftEdge.push(nextValue);
+        }
+        if (col == this.col + this.colCount - 1) {
+          internalEdges.rightEdge.push(nextValue);
         }
       }
     }
-    this.cells = nextCells;
+    this.cells = cells;
+    return { cells, internalEdges };
   }
 
   livingNeighbors(row, col) {
