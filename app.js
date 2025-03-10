@@ -61,7 +61,7 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
       backgroundDots: false
     };
     const grid = new ConsoleGrid(gridParams);
-    let lifeModel = LifeModel.createFrom(model.rowCount, model.colCount, model.cells);
+    let lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
     while (true) {
       lifeModel.draw(grid);
       await lifeModel.computeNext();

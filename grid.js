@@ -1,44 +1,42 @@
 const kMaxSubmodels = 8;
 
 export class LifeModel {
-  static createFrom(rowCount, colCount, sourceModel) {
-    const submodelCount = Math.min(kMaxSubmodels, Math.ceil(colCount / 10));
+  constructor(rowCount, colCount, sourceMap) {
+    this.rowCount = rowCount;
+    this.colCount = colCount;
 
-    let submodels = [];
+    const submodelCount = Math.min(kMaxSubmodels, Math.ceil(colCount / 10));
     let width = Math.floor(colCount / submodelCount);
     let remainder = colCount % submodelCount;
 
+    let submodels = [];
     let subCol = 0;
+
     for (let i = 0; i < submodelCount; i++) {
       const subColCount = width + (remainder > 0 ? 1 : 0);
       remainder--;
-      // submodel params are row, col, rowCount, colCount, and parentColCount
-      const submodel = new SubModel(0, subCol, rowCount, subColCount, colCount);
-      for (let row=0; row < rowCount; row++) {
+      const cells = new Set();
+      for (let row = 0; row < rowCount; row++) {
         for (let col = subCol; col < subCol + subColCount; col++) {
-          const sourceKey = row*colCount + col;
-          const sourceValue = sourceModel.get(sourceKey);
-          if (sourceValue) {
-            submodel.setCellWithKey(sourceKey, sourceValue); 
+          const key = row * colCount + col;
+          const sourceValue = sourceMap.get(key);
+          if (sourceMap.get(key)) {
+            cells.add(key);
           }
         }
       }
+      // submodel params are { row, col, rowCount, colCount, parentColCount, cells }
+      const submodel = new SubModel(0, subCol, rowCount, subColCount, colCount, cells);
       submodels.push(submodel);
       subCol += subColCount;
     }
-    return new LifeModel(rowCount, colCount, submodels);
-  }
-
-  constructor(rowCount, colCount, submodels) {
-    this.rowCount = rowCount;
-    this.colCount = colCount;
     this.submodels = submodels;
   }
 
   draw(grid) {
     let totalLiving = 0;
-    for (let row=0; row <this.rowCount; row++) {
-      for (let col=0; col<this.colCount; col++) {
+    for (let row = 0; row < this.rowCount; row++) {
+      for (let col = 0; col < this.colCount; col++) {
         const value = this.getCell(row, col);
         const glyph = value ? '#' : ' ';
         if (value) totalLiving++;
@@ -70,7 +68,7 @@ export class LifeModel {
 
     const computePromises = this.submodels.map((submodel, i) => {
       const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge || [] : [];
-      const externalRightEdge = (i < this.submodels.length-1) ? edges[i + 1].leftEdge || [] : [];
+      const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge || [] : [];
       return submodel.computeNext({ externalLeftEdge, externalRightEdge });
     });
 
@@ -80,14 +78,13 @@ export class LifeModel {
 }
 
 class SubModel {
-  constructor(row, col, rowCount, colCount, parentColCount) {
+  constructor(row, col, rowCount, colCount, parentColCount, cells) {
     this.row = row;
     this.col = col;
     this.rowCount = rowCount;
     this.colCount = colCount;
     this.parentColCount = parentColCount;
-
-    this.cells = new Set();
+    this.cells = cells;
   }
 
   key(row, col) {
@@ -117,8 +114,8 @@ class SubModel {
     // omits leftEdge for the leftmost submodel and rightEdge for the rightmost
     const result = {};
     if (this.col > 0) result.leftEdge = [];
-    if (this.col+this.colCount < this.parentColCount) result.rightEdge = [];
-    
+    if (this.col + this.colCount < this.parentColCount) result.rightEdge = [];
+
     for (let row = this.row; row < this.row + this.rowCount; row++) {
       if (result.leftEdge) {
         const value = this.getCell(row, this.col);
