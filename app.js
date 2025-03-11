@@ -62,10 +62,11 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
     };
     const grid = new ConsoleGrid(gridParams);
     let lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
+    await lifeModel.init();
     while (true) {
       lifeModel.draw(grid);
       await lifeModel.computeNext();
-      await sleep(200);
+      await sleep(2);
     }
 
 

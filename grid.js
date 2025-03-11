@@ -1,8 +1,12 @@
 const kMaxSubmodels = 8;
+const kOptimalWidth = 10;
+
+const workerScript = './worker-bee.js';
 
 
-export class MyClassProxy {
-  constructor(workerScript = './worker-bee.js') {
+export class SubModelProxy {
+  constructor(submodelParams) {
+    this.submodelParams = submodelParams;
     this.worker = new Worker(workerScript, { type: 'module' });
   }
 
@@ -23,8 +27,10 @@ export class MyClassProxy {
     });
   }
 
-  async create(params) {
-    return this.sendMessage('create', params);
+  async create() {
+    const promise = this.sendMessage('create', this.submodelParams);
+    this.submodelParams = null; // the worker keeps the current state;
+    return promise;
   }
 
   async compute(params) {
@@ -32,32 +38,17 @@ export class MyClassProxy {
   }
 }
 
-const proxy = new MyClassProxy();
-
-async function run() {
-  try {
-    const createResult = await proxy.create({ value: 10 });
-    console.log('createResult', createResult);
-
-    const computeResult = await proxy.compute({ value: 5 });
-    console.log('computeResult', computeResult);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-run();
-
-
 
 export class LifeModel {
   constructor(rowCount, colCount, sourceMap) {
     this.rowCount = rowCount;
     this.colCount = colCount;
 
-    const submodelCount = Math.min(kMaxSubmodels, Math.ceil(colCount / 10));
+    const submodelCount = Math.min(kMaxSubmodels, Math.ceil(colCount / kOptimalWidth));
     const width = Math.floor(colCount / submodelCount);
     let remainder = colCount % submodelCount;
+
+    console.log("submodel count", submodelCount, "approx size", { rowCount, width }, `${rowCount*width} cells each`);
 
     const submodels = [];
     const allCells = [];
@@ -80,8 +71,7 @@ export class LifeModel {
           }
           if (col == subCol) {
             leftEdge.push(value);
-          }
-          if (col == subCol + subColCount - 1) {
+          } else if (col == subCol + subColCount - 1) {
             rightEdge.push(value);
           }
         }
@@ -91,13 +81,24 @@ export class LifeModel {
 
       // submodel params are { row, col, rowCount, colCount, parentColCount, cells }
       const params = { row: 0, col: subCol, rowCount, colCount: subColCount, parentColCount: colCount, cells }
-      const submodel = new SubModel(params);
+      const submodel = new SubModelProxy(params);
       submodels.push(submodel);
       subCol += subColCount;
     }
     this.allInternalEdges = allInternalEdges;
     this.allCells = allCells;
     this.submodels = submodels;
+  }
+
+  async init() {
+    try {
+      for (let submodel of this.submodels) {
+        await submodel.create();
+      }
+    } catch (error) {
+      console.error('Error', error);
+      throw error;
+    }
   }
 
   draw(grid) {
@@ -115,83 +116,20 @@ export class LifeModel {
   }
 
   async computeNext() {
-    const edges = this.allInternalEdges;
-    const computePromises = this.submodels.map((submodel, i) => {
-      const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge : [];
-      const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge : [];
-      return submodel.computeNext({ externalLeftEdge, externalRightEdge });
-    });
+    try {
+      const edges = this.allInternalEdges;
+      const computePromises = this.submodels.map((submodel, i) => {
+        const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge : [];
+        const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge : [];
+        return submodel.compute({ externalLeftEdge, externalRightEdge });
+      });
 
-    const result = await Promise.all(computePromises);
-    this.allCells = result.map(obj => obj.cells);
-    this.allInternalEdges = result.map(obj => obj.internalEdges);
-  }
-
-}
-
-class SubModel {
-  constructor(params) {
-    Object.assign(this, params);
-  }
-
-  key(row, col) {
-    return row * this.parentColCount + col;
-  }
-
-  setCell(row, col, state) {
-    const key = this.key(row, col);
-    state ? this.cells.add(key) : this.cells.delete(key);
-  }
-
-  getCell(row, col) {
-    const key = this.key(row, col);
-    return this.cells.has(key);
-  }
-
-  // receive external edges and return cells and internal edges
-  // externalEdges is { externalLeftEdge: [bools], externalRightEdge: [bools] }
-  // return { cells: {set of true indexes }, { leftEdge: [bools], rightEdge: [bools] }  };
-  computeNext(externalEdges) {
-    const cells = new Set();
-
-    for (let row = this.row; row < this.row + this.rowCount; row++) {
-      this.setCell(row, this.col - 1, externalEdges.externalLeftEdge[row]);
-      this.setCell(row, this.col + this.colCount, externalEdges.externalRightEdge[row]);
+      const result = await Promise.all(computePromises);
+      this.allCells = result.map(obj => obj.cells);
+      this.allInternalEdges = result.map(obj => obj.internalEdges);
+    } catch (error) {
+      console.error('Error', error);
+      throw error;
     }
-
-    const internalEdges = { leftEdge: [], rightEdge: [] };
-    for (let row = this.row; row < this.row + this.rowCount; row++) {
-      for (let col = this.col; col < this.col + this.colCount; col++) {
-        const value = this.getCell(row, col);
-        const liveNeighbors = this.livingNeighbors(row, col);
-
-        const nextValue = (liveNeighbors == 3) || (value && liveNeighbors == 2);
-        if (nextValue) {
-          const key = row * this.parentColCount + col;
-          cells.add(key)
-        }
-        if (col == this.col) {
-          internalEdges.leftEdge.push(nextValue);
-        }
-        if (col == this.col + this.colCount - 1) {
-          internalEdges.rightEdge.push(nextValue);
-        }
-      }
-    }
-    this.cells = cells;
-    return { cells, internalEdges };
   }
-
-  livingNeighbors(row, col) {
-    let result = 0;
-    for (let r = row - 1; r <= row + 1; r++) {
-      for (let c = col - 1; c <= col + 1; c++) {
-        if (this.getCell(r, c)) {
-          result++;
-        }
-      }
-    }
-    return this.getCell(row, col) ? result - 1 : result;
-  }
-
 }
