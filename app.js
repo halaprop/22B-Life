@@ -11,6 +11,8 @@ const iterationEl = document.getElementById("iteration-counter");
 const livingCellsEl = document.getElementById("living-cells-counter");
 const sliderEl = document.getElementById('timeout-slider');
 const playbackBtn = document.getElementById('playback-btn');
+const fpsEl = document.getElementById('fpsEl');
+
 
 const builtInFigureModal = new BuiltInFigureModal("#built-in-modal");
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -18,6 +20,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 let running = true;
 let grid;
 let lifeModel;
+let lastFrameTime = performance.now();
 
 builtInFigureModal.runButton.addEventListener('click', async () => {
   if (running) running = false;
@@ -39,9 +42,18 @@ builtInFigureModal.runButton.addEventListener('click', async () => {
   }
 });
 
+function updateFps() {
+  const now = performance.now();
+  const elapsedMs = now - lastFrameTime;
+  lastFrameTime = now;
+  const fps = (1000 / elapsedMs).toFixed(1);
+  fpsEl.textContent = `${fps} fps`;
+}
+
 async function startRunning() {
   running = true;
   while (running) {
+    updateFps();
     lifeModel.draw(grid);
     await lifeModel.computeNext();
     await sleep(2);
