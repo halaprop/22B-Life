@@ -15,7 +15,12 @@ const playbackBtn = document.getElementById('playback-btn');
 const builtInFigureModal = new BuiltInFigureModal("#built-in-modal");
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-builtInFigureModal.runButton.addEventListener("click", async () => {
+let running = true;
+let grid;
+let lifeModel;
+
+builtInFigureModal.runButton.addEventListener('click', async () => {
+  if (running) running = false;
   try {
     let model = await builtInFigureModal.fetchAndParse();
     const gridParams = {
@@ -25,17 +30,29 @@ builtInFigureModal.runButton.addEventListener("click", async () => {
       // statusLineEl: document.getElementById('status-line'),
       backgroundDots: false
     };
-    const grid = new ConsoleGrid(gridParams);
-    let lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
+    grid = new ConsoleGrid(gridParams);
+    lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
     await lifeModel.init();
-    while (true) {
-      lifeModel.draw(grid);
-      await lifeModel.computeNext();
-      await sleep(2);
-    }
-
+    startRunning();
   } catch (error) {
     throw error;
   }
 });
 
+async function startRunning() {
+  running = true;
+  while (running) {
+    lifeModel.draw(grid);
+    await lifeModel.computeNext();
+    await sleep(2);
+  }
+}
+
+playbackBtn.addEventListener('click', () => {
+  if (running) {
+    running = false;
+  } else {
+    startRunning();
+  }
+
+})
