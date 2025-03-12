@@ -25,11 +25,6 @@ export class SubModel {
   computeNext(externalEdges) {
     const cells = new Set();
 
-    // for (let row = this.row; row < this.row + this.rowCount; row++) {
-    //   this.setCell(row, this.col - 1, externalEdges.externalLeftEdge[row]);
-    //   this.setCell(row, this.col + this.colCount, externalEdges.externalRightEdge[row]);
-    // }
-
     const internalEdges = { leftEdge: [], rightEdge: [] };
     for (let row = this.row; row < this.row + this.rowCount; row++) {
       for (let col = this.col; col < this.col + this.colCount; col++) {
@@ -43,8 +38,7 @@ export class SubModel {
         }
         if (col == this.col) {
           internalEdges.leftEdge.push(nextValue);
-        }
-        if (col == this.col + this.colCount - 1) {
+        } else if (col == this.col + this.colCount - 1) {
           internalEdges.rightEdge.push(nextValue);
         }
       }
@@ -61,14 +55,18 @@ export class SubModel {
     for (let r = startRow; r <= endRow; r++) {
       for (let c = col - 1; c <= col + 1; c++) {
         let value;
-        if (col == this.col - 1) {
-          value = externalEdges.externalLeftEdge[row];
-        } else if (col == this.colCount) {
-          value = externalEdges.externalRightEdge[row];
+        if (c == -1 || c == this.parentColCount || r == -1 || r == this.rowCount) {
+          value = false;
+        } else if (c == this.col - 1) {
+          value = externalEdges.externalLeftEdge[r];
+        } else if (c == this.col + this.colCount) {
+          value = externalEdges.externalRightEdge[r];
         } else {
           value = this.getCell(r, c);
         }
-        if (value) result++;
+        if (value) {
+          result++;
+        }
       }
     }
     return this.getCell(row, col) ? result - 1 : result;

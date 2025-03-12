@@ -4,41 +4,6 @@ const kOptimalWidth = 10;
 const workerScript = './worker-bee.js';
 
 
-export class SubModelProxy {
-  constructor(submodelParams) {
-    this.submodelParams = submodelParams;
-    this.worker = new Worker(workerScript, { type: 'module' });
-  }
-
-  sendMessage(command, params) {
-    return new Promise((resolve, reject) => {
-      const handleMessage = (event) => {
-        const data = event.data;
-        if (data.status === 'ok') {
-          resolve(data.result || data);
-        } else {
-          reject(data.error);
-        }
-        this.worker.removeEventListener('message', handleMessage);
-      };
-
-      this.worker.addEventListener('message', handleMessage);
-      this.worker.postMessage({ command, params });
-    });
-  }
-
-  async create() {
-    const promise = this.sendMessage('create', this.submodelParams);
-    this.submodelParams = null; // the worker keeps the current state;
-    return promise;
-  }
-
-  async compute(params) {
-    return this.sendMessage('compute', params);
-  }
-}
-
-
 export class LifeModel {
   constructor(rowCount, colCount, sourceMap) {
     this.rowCount = rowCount;
@@ -131,5 +96,43 @@ export class LifeModel {
       console.error('Error', error);
       throw error;
     }
+  }
+}
+
+
+/*****************************************************************************/
+/*****************************************************************************/
+
+export class SubModelProxy {
+  constructor(submodelParams) {
+    this.submodelParams = submodelParams;
+    this.worker = new Worker(workerScript, { type: 'module' });
+  }
+
+  sendMessage(command, params) {
+    return new Promise((resolve, reject) => {
+      const handleMessage = (event) => {
+        const data = event.data;
+        if (data.status === 'ok') {
+          resolve(data.result || data);
+        } else {
+          reject(data.error);
+        }
+        this.worker.removeEventListener('message', handleMessage);
+      };
+
+      this.worker.addEventListener('message', handleMessage);
+      this.worker.postMessage({ command, params });
+    });
+  }
+
+  async create() {
+    const promise = this.sendMessage('create', this.submodelParams);
+    this.submodelParams = null; // the worker keeps the current state;
+    return promise;
+  }
+
+  async compute(params) {
+    return this.sendMessage('compute', params);
   }
 }
