@@ -5,7 +5,7 @@ const workerScript = './worker-bee.js';
 
 
 export class LifeModel {
-  constructor(rowCount, colCount, sourceMap) {
+  constructor(rowCount, colCount, sourceSet) {
     this.rowCount = rowCount;
     this.colCount = colCount;
 
@@ -30,7 +30,7 @@ export class LifeModel {
       for (let row = 0; row < rowCount; row++) {
         for (let col = subCol; col < subCol + subColCount; col++) {
           const key = row * colCount + col;
-          const value = sourceMap.get(key);
+          const value = sourceSet.has(key);
           if (value) {
             cells.add(key);
           }
