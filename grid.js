@@ -80,6 +80,23 @@ export class LifeModel {
     return totalLiving;
   }
 
+  // so we can do fast rendering as a string
+  // render into: 
+  //   <div id="text-canvas"  style="border: 1px solid white; white-space: pre;  font-family: monospace;  width: 100%;  height: 100%;  overflow: auto; font-size: 2px;"></div>
+  asString() {
+    const bytes = new Uint8Array(this.rowCount * this.colCount + this.rowCount - 1).fill(0x20);
+    for (let i = 0; i < this.rowCount - 1; i++) {
+        bytes[(i + 1) * this.colCount + i] = 0x0A;
+    }
+    for (const cells of this.allCells) {
+        for (const key of cells) {
+            let adjustedKey = key + Math.floor(key / this.colCount); 
+            bytes[adjustedKey] = 0x23;
+        }
+    }
+    return new TextDecoder().decode(bytes);
+  }
+
   async computeNext() {
     try {
       const edges = this.allInternalEdges;
