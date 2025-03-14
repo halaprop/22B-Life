@@ -70,12 +70,7 @@ export class LifeModel {
     grid.eraseAll();
     let totalLiving = 0;
     for (const cells of this.allCells) {
-      for (const key of cells) {
-        totalLiving++;
-        const row = Math.floor(key / this.colCount);
-        const col = key % this.colCount;
-        grid.drawCharAt(row, col, '#');
-      }
+      grid.drawSet(cells);
     }
     return totalLiving;
   }

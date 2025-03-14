@@ -55,13 +55,40 @@ export class ConsoleGrid {
     }
   }
 
-  eraseAll() {
-    for (let row = 0; row < this.rowCount; row++) {
-      for (let col = 0; col < this.colCount; col++) {
-        this.setGridAt(row, col, null);
-      }
+  drawSet(set) {
+    // set is a set of true indexes
+    const ctx = this.ctx;
+    ctx.fillStyle = 'white';
+    const inset = 1;
+    const insetCellSize = this.cellSize - inset * 2;
+
+
+    for (let key of set) {
+      const row = Math.floor(key / this.colCount);
+      const col = key % this.colCount;
+      //const { x, y } = this.cellCenter(row, col);
+      //ctx.fillText('#', x, y);
+      const x = col * this.cellSize + ConsoleGrid.kBorderWidth;
+      const y = row * this.cellSize + ConsoleGrid.kBorderWidth;
+      ctx.fillRect(x+inset, y+inset, insetCellSize, insetCellSize);
+
     }
-    this.redraw();
+  }
+
+  eraseAll() {
+    const { ctx, width, height } = this;
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = ConsoleGrid.kBorderWidth;
+    ctx.strokeRect(
+      ConsoleGrid.kBorderWidth / 2,
+      ConsoleGrid.kBorderWidth / 2,
+      width + ConsoleGrid.kBorderWidth,
+      height + ConsoleGrid.kBorderWidth
+    );
   }
 
   setStatusLine(statusLine) {
