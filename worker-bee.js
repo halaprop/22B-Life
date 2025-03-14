@@ -1,6 +1,6 @@
 
 // to do - export this from a file
-import { SubModel } from "./subgrid.js";
+import { SubModel } from "./life-submodel.js";
 
 let instance = null;
 

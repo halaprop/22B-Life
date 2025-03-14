@@ -2,7 +2,7 @@
 
 import { BuiltInFigureModal } from "./builtinFigureModal.js";
 import { ConsoleGrid } from "./console.js";
-import { LifeModel } from "./grid.js";
+import { LifeModel } from "./life-model.js";
 
 console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
 
