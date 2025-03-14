@@ -1,7 +1,7 @@
 const kMaxSubmodels = 8;
 const kOptimalWidth = 10;
 
-const workerScript = './worker-bee.js';
+const workerScript = './life-worker.js';
 
 
 export class LifeModel {
