@@ -3,7 +3,6 @@ const kOptimalWidth = 10;
 
 const workerScript = './life-worker.js';
 
-
 export class LifeModel {
   constructor(rowCount, colCount, sourceSet) {
     this.rowCount = rowCount;
@@ -70,7 +69,7 @@ export class LifeModel {
     grid.eraseAll();
     let totalLiving = 0;
     for (const cells of this.allCells) {
-      grid.drawSet(cells);
+      totalLiving += grid.drawSet(cells);
     }
     return totalLiving;
   }
