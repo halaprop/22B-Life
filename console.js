@@ -1,5 +1,5 @@
 
-export class ConsoleGrid {
+export class LifeUI {
   static kBorderWidth = 1;
 
   // in life, status line el is optional, root element is not used. caller passes canvas el in
@@ -12,8 +12,8 @@ export class ConsoleGrid {
     const width = this.colCount * this.cellSize;
     const height = this.rowCount * this.cellSize;
 
-    this.canvas.width = width + 2 * ConsoleGrid.kBorderWidth;
-    this.canvas.height = height + 2 * ConsoleGrid.kBorderWidth;
+    this.canvas.width = width + 2 * LifeUI.kBorderWidth;
+    this.canvas.height = height + 2 * LifeUI.kBorderWidth;
     const ctx = this.canvas.getContext("2d");
     this.ctx = ctx;
 
@@ -21,17 +21,13 @@ export class ConsoleGrid {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     ctx.strokeStyle = "white";
-    ctx.lineWidth = ConsoleGrid.kBorderWidth;
+    ctx.lineWidth = LifeUI.kBorderWidth;
     ctx.strokeRect(
-      ConsoleGrid.kBorderWidth / 2,
-      ConsoleGrid.kBorderWidth / 2,
-      width + ConsoleGrid.kBorderWidth,
-      height + ConsoleGrid.kBorderWidth
+      LifeUI.kBorderWidth / 2,
+      LifeUI.kBorderWidth / 2,
+      width + LifeUI.kBorderWidth,
+      height + LifeUI.kBorderWidth
     );
-
-    ctx.font = `${this.cellSize * 0.8}px monospace`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
   }
 
   drawSet(set) {
@@ -41,13 +37,12 @@ export class ConsoleGrid {
     const inset = 1;
     const insetCellSize = this.cellSize - inset * 2;
 
-
     for (let key of set) {
       livingCells++;
       const row = Math.floor(key / this.colCount);
       const col = key % this.colCount;
-      const x = col * this.cellSize + ConsoleGrid.kBorderWidth;
-      const y = row * this.cellSize + ConsoleGrid.kBorderWidth;
+      const x = col * this.cellSize + LifeUI.kBorderWidth;
+      const y = row * this.cellSize + LifeUI.kBorderWidth;
       ctx.fillRect(x+inset, y+inset, insetCellSize, insetCellSize);
     }
     return livingCells;
@@ -60,12 +55,12 @@ export class ConsoleGrid {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     ctx.strokeStyle = "white";
-    ctx.lineWidth = ConsoleGrid.kBorderWidth;
+    ctx.lineWidth = LifeUI.kBorderWidth;
     ctx.strokeRect(
-      ConsoleGrid.kBorderWidth / 2,
-      ConsoleGrid.kBorderWidth / 2,
-      width + ConsoleGrid.kBorderWidth,
-      height + ConsoleGrid.kBorderWidth
+      LifeUI.kBorderWidth / 2,
+      LifeUI.kBorderWidth / 2,
+      width + LifeUI.kBorderWidth,
+      height + LifeUI.kBorderWidth
     );
   }
 }

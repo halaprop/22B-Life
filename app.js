@@ -1,7 +1,7 @@
 
 
 import { BuiltInFigureModal } from "./builtinFigureModal.js";
-import { ConsoleGrid } from "./console.js";
+import { LifeUI } from "./console.js";
 import { LifeModel } from "./life-model.js";
 
 console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
@@ -33,7 +33,7 @@ builtInFigureModal.runButton.addEventListener('click', async () => {
       // statusLineEl: document.getElementById('status-line'),
       backgroundDots: false
     };
-    grid = new ConsoleGrid(gridParams);
+    grid = new LifeUI(gridParams);
     lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
     await lifeModel.init();
     startRunning();
