@@ -18,6 +18,7 @@ const builtInFigureModal = new BuiltInFigureModal("#built-in-modal");
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 let running = true;
+let iteration = 0;
 let grid;
 let lifeModel;
 let lastFrameTime = performance.now();
@@ -36,27 +37,35 @@ builtInFigureModal.runButton.addEventListener('click', async () => {
     grid = new LifeUI(gridParams);
     lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
     await lifeModel.init();
+    iteration = 0;
     startRunning();
   } catch (error) {
     throw error;
   }
 });
 
-function updateFps() {
+function updateStats(livingCellCount) {
+  iterationEl.textContent = `${iteration} turns`;
+  livingCellsEl.textContent = `${livingCellCount} living`;
+
+  if (iteration % 10 == 0) {
   const now = performance.now();
   const elapsedMs = now - lastFrameTime;
   lastFrameTime = now;
   const fps = (1000 / elapsedMs).toFixed(1);
   fpsEl.textContent = `${fps} fps`;
+  }
 }
 
 async function startRunning() {
   running = true;
+  let livingCellCount = 0;
   while (running) {
-    updateFps();
-    lifeModel.draw(grid);
+    updateStats(livingCellCount);
+    livingCellCount = lifeModel.draw(grid);
     await lifeModel.computeNext();
-    await sleep(2);
+    await sleep(1);
+    iteration++;
   }
 }
 

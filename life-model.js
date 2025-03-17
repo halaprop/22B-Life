@@ -1,5 +1,5 @@
 const kMaxSubmodels = 8;
-const kOptimalWidth = 10;
+const kOptimalWidth = 20;
 
 const workerScript = './life-worker.js';
 

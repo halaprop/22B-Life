@@ -44,6 +44,15 @@
       height: auto;
       border: 1px solid black;
     }
+
+    .running-stat {
+      margin-top: 4px;
+      font-family: monospace;
+      display: inline-block;
+      min-width: 3ch;
+      text-align: right;
+      color: white
+    }
   </style>
 </head>
 
@@ -74,9 +83,10 @@
     <button id="playback-btn" class="uk-button" style="min-width: 75px;"><i class="fa fa-play"></i></button>
     <input id="timeout-slider" class="uk-range uk-margin-small-left" type="range" min="0" max="4" step="1" value="2"
       style="width: 100px;">
-    <span id="iteration-counter" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;"></span>
-    <span id="living-cells-counter" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;"></span>
-    <span id="fpsEl" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;"></span>
+    <span id="iteration-counter" class="running-stat uk-margin-left"></span>
+    <span id="living-cells-counter" class="running-stat uk-margin-left"></span>
+    <!-- <span id="fpsEl" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;"></span> -->
+    <span id="fpsEl" class="running-stat uk-margin-left"></span>
     </div>
 
   <div id="built-in-modal" uk-modal>
