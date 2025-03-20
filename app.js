@@ -21,6 +21,7 @@ let running = true;
 let iteration = 0;
 let grid;
 let lifeModel;
+const kFramesPerSample = 10;
 let lastFrameTime = performance.now();
 
 builtInFigureModal.runButton.addEventListener('click', async () => {
@@ -48,12 +49,12 @@ function updateStats(livingCellCount) {
   iterationEl.textContent = `${iteration} turns`;
   livingCellsEl.textContent = `${livingCellCount} living`;
 
-  if (iteration % 10 == 0) {
-  const now = performance.now();
-  const elapsedMs = now - lastFrameTime;
-  lastFrameTime = now;
-  const fps = (1000 / elapsedMs).toFixed(1);
-  fpsEl.textContent = `${fps} fps`;
+  if (iteration % kFramesPerSample == 0) {
+    const now = performance.now();
+    const elapsedMs = now - lastFrameTime;
+    lastFrameTime = now;
+    const fps = (kFramesPerSample * 1000 / elapsedMs).toFixed(1);
+    fpsEl.textContent = `${fps} fps`;
   }
 }
 
@@ -64,7 +65,7 @@ async function startRunning() {
     updateStats(livingCellCount);
     livingCellCount = lifeModel.draw(grid);
     await lifeModel.computeNext();
-    await sleep(1);
+    //await sleep(1);
     iteration++;
   }
 }
