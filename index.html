@@ -80,14 +80,24 @@
 
   <!-- Footer -->
   <div id="footer-bar" class="uk-flex uk-padding-small">
-    <button id="playback-btn" class="uk-button" style="min-width: 75px;"><i class="fa fa-play"></i></button>
-    <input id="timeout-slider" class="uk-range uk-margin-small-left" type="range" min="0" max="4" step="1" value="2"
-      style="width: 100px;">
+    <button id="playback-btn" class="uk-button"><i class="fa fa-pause"></i></button>
+    <button id="speed-btn" class="uk-button uk-margin-left" type="button">1&times;</button>
+    <div uk-dropdown="mode: click">
+      <ul class="uk-nav uk-dropdown-nav">
+        <li><a href="#" data-speed="1">1&times;</a></li>
+        <li><a href="#" data-speed="2">2&times;</a></li>
+        <li><a href="#" data-speed="3">3&times;</a></li>
+        <li><a href="#" data-speed="4">4&times;</a></li>
+        <li><a href="#" data-speed="5">5&times;</a></li>
+      </ul>
+    </div>
+      <!-- <input id="timeout-slider" class="uk-range uk-margin-small-left" type="range" min="0" max="4" step="1" value="2"
+      style="width: 100px;"> -->
     <span id="iteration-counter" class="running-stat uk-margin-left"></span>
     <span id="living-cells-counter" class="running-stat uk-margin-left"></span>
     <!-- <span id="fpsEl" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;"></span> -->
     <span id="fpsEl" class="running-stat uk-margin-left"></span>
-    </div>
+  </div>
 
   <div id="built-in-modal" uk-modal>
     <div class="uk-modal-dialog uk-modal-body">

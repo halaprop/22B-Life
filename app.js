@@ -7,11 +7,12 @@ import { LifeModel } from "./life-model.js";
 console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
 
 const canvasEl = document.getElementById("main-canvas");
+const playbackBtn = document.getElementById('playback-btn');
+const playbackIcon = playbackBtn.querySelector("i");
+var speedBtn = document.getElementById('speed-btn');
+const fpsEl = document.getElementById('fpsEl');
 const iterationEl = document.getElementById("iteration-counter");
 const livingCellsEl = document.getElementById("living-cells-counter");
-const sliderEl = document.getElementById('timeout-slider');
-const playbackBtn = document.getElementById('playback-btn');
-const fpsEl = document.getElementById('fpsEl');
 
 
 const builtInFigureModal = new BuiltInFigureModal("#built-in-modal");
@@ -32,7 +33,6 @@ builtInFigureModal.runButton.addEventListener('click', async () => {
       canvas: canvasEl,
       rowCount: model.rowCount,
       colCount: model.colCount,
-      // statusLineEl: document.getElementById('status-line'),
       backgroundDots: false
     };
     grid = new LifeUI(gridParams);
@@ -73,8 +73,21 @@ async function startRunning() {
 playbackBtn.addEventListener('click', () => {
   if (running) {
     running = false;
+    playbackIcon.classList.remove("fa-pause");
+    playbackIcon.classList.add("fa-play");
   } else {
+    playbackIcon.classList.remove("fa-play");
+    playbackIcon.classList.add("fa-pause");
     startRunning();
   }
+});
 
-})
+const speedItems = document.querySelectorAll('.uk-dropdown-nav a');
+
+speedItems.forEach(function(link) {
+  link.addEventListener('click', function(e) {
+    e.preventDefault(); 
+    const speed = parseInt(this.getAttribute('data-speed'));
+    speedBtn.innerHTML = `${speed}&times;`
+  });
+});
