@@ -1,8 +1,8 @@
 
-export class LifeUI {
-  static kBorderWidth = 1;
 
-  // in life, status line el is optional, root element is not used. caller passes canvas el in
+const kBorderWidth = 1;
+
+export class LifeConsoleGrid {
   constructor(params) {
     this.canvas = params.canvas;
     this.rowCount = params.rowCount || 20;
@@ -12,8 +12,8 @@ export class LifeUI {
     const width = this.colCount * this.cellSize;
     const height = this.rowCount * this.cellSize;
 
-    this.canvas.width = width + 2 * LifeUI.kBorderWidth;
-    this.canvas.height = height + 2 * LifeUI.kBorderWidth;
+    this.canvas.width = width + 2 * kBorderWidth;
+    this.canvas.height = height + 2 * kBorderWidth;
     const ctx = this.canvas.getContext("2d");
     this.ctx = ctx;
 
@@ -21,12 +21,12 @@ export class LifeUI {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     ctx.strokeStyle = "white";
-    ctx.lineWidth = LifeUI.kBorderWidth;
+    ctx.lineWidth = kBorderWidth;
     ctx.strokeRect(
-      LifeUI.kBorderWidth / 2,
-      LifeUI.kBorderWidth / 2,
-      width + LifeUI.kBorderWidth,
-      height + LifeUI.kBorderWidth
+      kBorderWidth / 2,
+      kBorderWidth / 2,
+      width + kBorderWidth,
+      height + kBorderWidth
     );
   }
 
@@ -41,8 +41,8 @@ export class LifeUI {
       livingCells++;
       const row = Math.floor(key / this.colCount);
       const col = key % this.colCount;
-      const x = col * this.cellSize + LifeUI.kBorderWidth;
-      const y = row * this.cellSize + LifeUI.kBorderWidth;
+      const x = col * this.cellSize + kBorderWidth;
+      const y = row * this.cellSize + kBorderWidth;
       ctx.fillRect(x+inset, y+inset, insetCellSize, insetCellSize);
     }
     return livingCells;
@@ -55,12 +55,12 @@ export class LifeUI {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     ctx.strokeStyle = "white";
-    ctx.lineWidth = LifeUI.kBorderWidth;
+    ctx.lineWidth = kBorderWidth;
     ctx.strokeRect(
-      LifeUI.kBorderWidth / 2,
-      LifeUI.kBorderWidth / 2,
-      width + LifeUI.kBorderWidth,
-      height + LifeUI.kBorderWidth
+      kBorderWidth / 2,
+      kBorderWidth / 2,
+      width + kBorderWidth,
+      height + kBorderWidth
     );
   }
 }

@@ -1,94 +1,107 @@
 
 
-import { BuiltInFigureModal } from "./builtinFigureModal.js";
-import { LifeUI } from "./console.js";
+import { FigureModal } from "./figure-modal.js";
+import { LifeConsoleGrid } from "./life-console-grid.js";
 import { LifeModel } from "./life-model.js";
 
-console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
 
-const canvasEl = document.getElementById("main-canvas");
-const playbackBtn = document.getElementById('playback-btn');
-const playbackIcon = playbackBtn.querySelector("i");
-var speedBtn = document.getElementById('speed-btn');
-const fpsEl = document.getElementById('fpsEl');
-const iterationEl = document.getElementById("iteration-counter");
-const livingCellsEl = document.getElementById("living-cells-counter");
+class LifeApp {
+  constructor() {
+    this.iterationEl = document.getElementById("iteration-counter");
+    this.livingCellsEl = document.getElementById("living-cells-counter");
+    this.fpsEl = document.getElementById('fpsEl');
 
+    this.isPlaying = true;
+    this.iteration = 0;
+    this.sleepTimeout = 30;
+    this.lastFrameTime = performance.now();
+    this.sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const builtInFigureModal = new BuiltInFigureModal("#built-in-modal");
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const figureModal = new FigureModal("#built-in-modal");
+    figureModal.runButton.addEventListener('click', async () => {
+      this.selectedFigure(figureModal);
+    });
 
-let running = true;
-let iteration = 0;
-let sleepTimeout = 30;
-let grid;
-let lifeModel;
-const kFramesPerSample = 10;
-let lastFrameTime = performance.now();
+    const playbackBtn = document.getElementById('playback-btn');
+    this.playbackIcon = playbackBtn.querySelector("i");
+    playbackBtn.addEventListener('click', () => {
+      this.pressedPlay();
+    });
 
-builtInFigureModal.runButton.addEventListener('click', async () => {
-  if (running) running = false;
-  try {
-    let model = await builtInFigureModal.fetchAndParse();
-    const gridParams = {
-      canvas: canvasEl,
-      rowCount: model.rowCount,
-      colCount: model.colCount,
-      backgroundDots: false
-    };
-    grid = new LifeUI(gridParams);
-    lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
-    await lifeModel.init();
-    iteration = 0;
-    startRunning();
-  } catch (error) {
-    throw error;
+    const speedItems = document.querySelectorAll('.uk-dropdown-nav a');
+    speedItems.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        this.selectedSpeed(link);
+      });
+    });
   }
-});
 
-function updateStats(livingCellCount) {
-  iterationEl.textContent = `${iteration} turns`;
-  livingCellsEl.textContent = `${livingCellCount} living`;
-
-  if (iteration % kFramesPerSample == 0) {
-    const now = performance.now();
-    const elapsedMs = now - lastFrameTime;
-    lastFrameTime = now;
-    const fps = (kFramesPerSample * 1000 / elapsedMs).toFixed(1);
-    fpsEl.textContent = `${fps} fps`;
+  async selectedFigure(builtInFigureModal) {
+    if (this.isPlaying) this.isPlaying = false;
+    try {
+      let model = await builtInFigureModal.fetchAndParse();
+      const gridParams = {
+        canvas: document.getElementById("main-canvas"),
+        rowCount: model.rowCount,
+        colCount: model.colCount,
+        backgroundDots: false
+      };
+      this.grid = new LifeConsoleGrid(gridParams);
+      this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
+      await this.lifeModel.init();
+      this.iteration = 0;
+      this.startPlaying();
+    } catch (error) {
+      throw error;
+    }
   }
-}
 
-async function startRunning() {
-  running = true;
-  let livingCellCount = 0;
-  while (running) {
-    updateStats(livingCellCount);
-    livingCellCount = lifeModel.draw(grid);
-    await lifeModel.computeNext();
-    await sleep(sleepTimeout);
-    iteration++;
+  async startPlaying() {
+    this.isPlaying = true;
+    let livingCellCount = 0;
+    while (this.isPlaying) {
+      this.updatePlaybackStats(livingCellCount);
+      livingCellCount = this.lifeModel.draw(this.grid);
+      await this.lifeModel.computeNext();
+      await this.sleep(this.sleepTimeout);
+      this.iteration++;
+    }
   }
-}
 
-playbackBtn.addEventListener('click', () => {
-  if (running) {
-    running = false;
-    playbackIcon.classList.remove("fa-pause");
-    playbackIcon.classList.add("fa-play");
-  } else {
-    playbackIcon.classList.remove("fa-play");
-    playbackIcon.classList.add("fa-pause");
-    startRunning();
+  pressedPlay() {
+    const icon = this.playbackIcon;
+    if (this.isPlaying) {
+      this.isPlaying = false;
+      icon.classList.remove("fa-pause");
+      icon.classList.add("fa-play");
+    } else {
+      icon.classList.remove("fa-play");
+      icon.classList.add("fa-pause");
+      this.startPlaying();
+    }
   }
-});
 
-const speedItems = document.querySelectorAll('.uk-dropdown-nav a');
+  updatePlaybackStats(livingCellCount) {
+    const kFramesPerSample = 10;
+    this.iterationEl.textContent = `${this.iteration} turns`;
+    this.livingCellsEl.textContent = `${livingCellCount} living`;
 
-speedItems.forEach(function(link) {
-  link.addEventListener('click', function(e) {
-    e.preventDefault(); 
-    sleepTimeout = parseInt(this.getAttribute('data-sleep'));
+    if (this.iteration % kFramesPerSample == 0) {
+      const now = performance.now();
+      const elapsedMs = now - this.lastFrameTime;
+      this.lastFrameTime = now;
+      const fps = (kFramesPerSample * 1000 / elapsedMs).toFixed(1);
+      this.fpsEl.textContent = `${fps} fps`;
+    }
+  }
+
+  selectedSpeed(link) {
+    this.sleepTimeout = parseInt(link.getAttribute('data-sleep'));
+    const speedBtn = document.getElementById('speed-btn');
     speedBtn.innerHTML = link.innerHTML;
-  });
-});
+  }
+}
+
+console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
+new LifeApp();

@@ -1,5 +1,5 @@
 
-export class BuiltInFigureModal {
+export class FigureModal {
   // modalID must contain a <ul> with id #figure-list
   // modalID must contain button with id #run-figure
   constructor(modalID) {
