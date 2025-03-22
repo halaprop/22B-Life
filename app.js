@@ -38,7 +38,6 @@ class LifeApp {
   }
 
   async selectedFigure(builtInFigureModal) {
-    if (this.isPlaying) this.isPlaying = false;
     try {
       let model = await builtInFigureModal.fetchAndParse();
       const gridParams = {
@@ -51,7 +50,12 @@ class LifeApp {
       this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
       await this.lifeModel.init();
       this.iteration = 0;
-      this.startPlaying();
+      if (this.isPlaying) {
+        this.startPlaying();
+      } else {
+        const livingCellCount = this.lifeModel.draw(this.grid);
+        this.updatePlaybackStats(livingCellCount);  
+      }
     } catch (error) {
       throw error;
     }
@@ -61,8 +65,8 @@ class LifeApp {
     this.isPlaying = true;
     let livingCellCount = 0;
     while (this.isPlaying) {
-      this.updatePlaybackStats(livingCellCount);
       livingCellCount = this.lifeModel.draw(this.grid);
+      this.updatePlaybackStats(livingCellCount);
       await this.lifeModel.computeNext();
       await this.sleep(this.sleepTimeout);
       this.iteration++;
@@ -84,7 +88,7 @@ class LifeApp {
 
   updatePlaybackStats(livingCellCount) {
     const kFramesPerSample = 10;
-    this.iterationEl.textContent = `${this.iteration} turns`;
+    this.iterationEl.textContent = `${this.iteration} iterations`;
     this.livingCellsEl.textContent = `${livingCellCount} living`;
 
     if (this.iteration % kFramesPerSample == 0) {
