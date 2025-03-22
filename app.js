@@ -20,6 +20,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 let running = true;
 let iteration = 0;
+let sleepTimeout = 30;
 let grid;
 let lifeModel;
 const kFramesPerSample = 10;
@@ -65,7 +66,7 @@ async function startRunning() {
     updateStats(livingCellCount);
     livingCellCount = lifeModel.draw(grid);
     await lifeModel.computeNext();
-    //await sleep(1);
+    await sleep(sleepTimeout);
     iteration++;
   }
 }
@@ -87,7 +88,7 @@ const speedItems = document.querySelectorAll('.uk-dropdown-nav a');
 speedItems.forEach(function(link) {
   link.addEventListener('click', function(e) {
     e.preventDefault(); 
-    const speed = parseInt(this.getAttribute('data-speed'));
-    speedBtn.innerHTML = `${speed}&times;`
+    sleepTimeout = parseInt(this.getAttribute('data-sleep'));
+    speedBtn.innerHTML = link.innerHTML;
   });
 });
