@@ -18,12 +18,20 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      background-color: black;
+      background-color: #303030;
+    }
+
+    .uk-button.uk-button-default.uk-light:hover {
+      color: #fff;
+    }
+
+    .uk-navbar-item.uk-logo {
+      font-weight: 100;
     }
 
     #nav-bar,
     #footer-bar {
-      background-color: #303030;
+      background-color: #505050;
     }
 
     /* Main content area */
@@ -35,14 +43,8 @@
       padding: 10px;
     }
 
-    /* The canvas itself respects its intrinsic size */
     canvas {
-      display: block;
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      border: 1px solid black;
+      border: 0.5px solid rgba(255, 255, 255, 0.5);
     }
 
     .running-stat {
@@ -62,14 +64,11 @@
   <nav id="nav-bar" class="uk-navbar-container uk-navbar-sticky" uk-navbar>
 
     <div class="uk-navbar-left uk-light">
-      <span class="uk-navbar-item uk-logo uk-margin-left">CIS 22B Project 2: Life</span>
+      <span class="uk-navbar-item uk-logo uk-margin-left">Conway's Game of Life</span>
     </div>
-    <div class="uk-navbar-right">
-      <button class="uk-button uk-button-default uk-light" type="button" uk-toggle="target: #built-in-modal">Built-in
-        Figures</button>
-      <button class="uk-button uk-button-default uk-light" type="button" uk-toggle="target: #upload-modal">Upload
-        Figure</button>
-      <!-- <button class="uk-button uk-button-default uk-light uk-margin-right" type="button" uk-toggle="target: #fetch-modal">Fetch Figure</button> -->
+    <div class="uk-navbar-right uk-margin-right">
+      <button class="uk-button uk-button-default uk-light" type="button"
+        uk-toggle="target: #built-in-modal">Figures</button>
     </div>
   </nav>
 
@@ -91,17 +90,14 @@
         <li><a href="#" data-sleep="7">4 &times;</a></li>
       </ul>
     </div>
-      <!-- <input id="timeout-slider" class="uk-range uk-margin-small-left" type="range" min="0" max="4" step="1" value="2"
-      style="width: 100px;"> -->
     <span id="iteration-counter" class="running-stat uk-margin-left"></span>
     <span id="living-cells-counter" class="running-stat uk-margin-left"></span>
-    <!-- <span id="fpsEl" style="margin-top: 4px; margin-left: 34px; font-size: large; color: white;"></span> -->
     <span id="fpsEl" class="running-stat uk-margin-left"></span>
   </div>
 
   <div id="built-in-modal" uk-modal>
     <div class="uk-modal-dialog uk-modal-body">
-      <h2 class="uk-modal-title uk-text-center">Select a Built-in Figure</h2>
+      <h2 class="uk-modal-title uk-text-center">Select a Figure</h2>
 
       <!-- figures -->
       <ul class="uk-list uk-list-divider uk-text-center" id="figure-list">
