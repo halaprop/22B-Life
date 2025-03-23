@@ -74,6 +74,12 @@ export class LifeModel {
     return totalLiving;
   }
 
+  terminate() {
+    for (let submodel of this.submodels) {
+      submodel.terminate();
+    }
+  }
+
   // so we can do fast rendering as a string
   // render into: 
   //   <div id="text-canvas"  style="border: 1px solid white; white-space: pre;  font-family: monospace;  width: 100%;  height: 100%;  overflow: auto; font-size: 2px;"></div>
@@ -145,5 +151,9 @@ export class SubModelProxy {
 
   async compute(params) {
     return this.sendMessage('compute', params);
+  }
+
+  terminate() {
+    this.worker.terminate();
   }
 }

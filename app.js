@@ -11,6 +11,7 @@ class LifeApp {
     this.livingCellsEl = document.getElementById("living-cells-counter");
     this.fpsEl = document.getElementById('fpsEl');
 
+    this.runID = 0;
     this.isPlaying = true;
     this.iteration = 0;
     this.sleepTimeout = 30;
@@ -47,9 +48,13 @@ class LifeApp {
         backgroundDots: false
       };
       this.grid = new LifeConsoleGrid(gridParams);
+      if (this.lifeModel) {
+        this.lifeModel.terminate();
+      }
       this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
       await this.lifeModel.init();
       this.iteration = 0;
+      this.runID++;
       if (this.isPlaying) {
         this.startPlaying();
       } else {
@@ -62,12 +67,14 @@ class LifeApp {
   }
 
   async startPlaying() {
+    const runID = this.runID;
+    const lifeModel = this.lifeModel;
     this.isPlaying = true;
     let livingCellCount = 0;
-    while (this.isPlaying) {
-      livingCellCount = this.lifeModel.draw(this.grid);
+    while (this.isPlaying && runID == this.runID) {
+      livingCellCount = lifeModel.draw(this.grid);
       this.updatePlaybackStats(livingCellCount);
-      await this.lifeModel.computeNext();
+      await lifeModel.computeNext();
       await this.sleep(this.sleepTimeout);
       this.iteration++;
     }
