@@ -14,20 +14,9 @@ export class LifeConsoleGrid {
 
     this.canvas.width = width + 2 * kBorderWidth;
     this.canvas.height = height + 2 * kBorderWidth;
-    const ctx = this.canvas.getContext("2d");
-    this.ctx = ctx;
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = kBorderWidth;
-    ctx.strokeRect(
-      kBorderWidth / 2,
-      kBorderWidth / 2,
-      width + kBorderWidth,
-      height + kBorderWidth
-    );
+    this.ctx = this.canvas.getContext("2d");
+    
+    this.eraseAll();
   }
 
   drawSet(set) {

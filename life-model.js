@@ -100,13 +100,13 @@ export class LifeModel {
   async computeNext() {
     try {
       const edges = this.allInternalEdges;
-      const computePromises = this.submodels.map((submodel, i) => {
+      const promises = this.submodels.map((submodel, i) => {
         const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge : [];
         const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge : [];
         return submodel.compute({ externalLeftEdge, externalRightEdge });
       });
 
-      const result = await Promise.all(computePromises);
+      const result = await Promise.all(promises);
       this.allCells = result.map(obj => obj.cells);
       this.allInternalEdges = result.map(obj => obj.internalEdges);
     } catch (error) {
