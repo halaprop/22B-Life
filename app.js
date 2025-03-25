@@ -10,6 +10,8 @@ class LifeApp {
     this.iterationEl = document.getElementById("iteration-counter");
     this.livingCellsEl = document.getElementById("living-cells-counter");
     this.fpsEl = document.getElementById('fpsEl');
+    this.playbackBtn = document.getElementById('playback-btn');
+    this.playbackIcon = this.playbackBtn.querySelector("i");
 
     this.runID = 0;
     this.isPlaying = true;
@@ -23,9 +25,8 @@ class LifeApp {
       this.selectedFigure(figureModal);
     });
 
-    const playbackBtn = document.getElementById('playback-btn');
-    this.playbackIcon = playbackBtn.querySelector("i");
-    playbackBtn.addEventListener('click', () => {
+    this.playbackBtn.disabled = true;
+    this.playbackBtn.addEventListener('click', () => {
       this.pressedPlay();
     });
 
@@ -53,13 +54,14 @@ class LifeApp {
       }
       this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
       await this.lifeModel.init();
+      this.playbackBtn.disabled = false;
       this.iteration = 0;
       this.runID++;
       if (this.isPlaying) {
         this.startPlaying();
       } else {
         const livingCellCount = this.lifeModel.draw(this.grid);
-        this.updatePlaybackStats(livingCellCount);  
+        this.updatePlaybackStats(livingCellCount);
       }
     } catch (error) {
       throw error;
