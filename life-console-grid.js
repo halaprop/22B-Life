@@ -9,11 +9,11 @@ export class LifeConsoleGrid {
     this.colCount = params.colCount || 30;
     this.cellSize = params.cellSize || 16;
 
-    const width = this.colCount * this.cellSize;
-    const height = this.rowCount * this.cellSize;
+    this.width = this.colCount * this.cellSize;
+    this.height = this.rowCount * this.cellSize;
 
-    this.canvas.width = width + 2 * kBorderWidth;
-    this.canvas.height = height + 2 * kBorderWidth;
+    this.canvas.width = this.width + 2 * kBorderWidth;
+    this.canvas.height = this.height + 2 * kBorderWidth;
     this.ctx = this.canvas.getContext("2d");
     
     this.eraseAll();
@@ -41,7 +41,7 @@ export class LifeConsoleGrid {
     const { ctx, width, height } = this;
 
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillRect(0, 0, width, height);
 
     ctx.strokeStyle = "white";
     ctx.lineWidth = kBorderWidth;
