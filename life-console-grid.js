@@ -1,7 +1,5 @@
 
 
-const kBorderWidth = 1;
-
 export class LifeConsoleGrid {
   constructor(params) {
     this.canvas = params.canvas;
@@ -12,8 +10,8 @@ export class LifeConsoleGrid {
     this.width = this.colCount * this.cellSize;
     this.height = this.rowCount * this.cellSize;
 
-    this.canvas.width = this.width + 2 * kBorderWidth;
-    this.canvas.height = this.height + 2 * kBorderWidth;
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
     this.ctx = this.canvas.getContext("2d");
     
     this.eraseAll();
@@ -30,26 +28,16 @@ export class LifeConsoleGrid {
       livingCells++;
       const row = Math.floor(key / this.colCount);
       const col = key % this.colCount;
-      const x = col * this.cellSize + kBorderWidth;
-      const y = row * this.cellSize + kBorderWidth;
+      const x = col * this.cellSize;
+      const y = row * this.cellSize;
       ctx.fillRect(x+inset, y+inset, insetCellSize, insetCellSize);
     }
     return livingCells;
   }
 
   eraseAll() {
-    const { ctx, width, height } = this;
-
+    const ctx = this.ctx;
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = kBorderWidth;
-    ctx.strokeRect(
-      kBorderWidth / 2,
-      kBorderWidth / 2,
-      width + kBorderWidth,
-      height + kBorderWidth
-    );
+    ctx.fillRect(0, 0, this.width, this.height);
   }
 }
