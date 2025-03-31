@@ -6,7 +6,7 @@ export class SubModel {
   }
 
   key(row, col) {
-    return row * this.parentColCount + col;
+    return row * this.colCount + col;
   }
 
   setCell(row, col, state) {
@@ -20,12 +20,12 @@ export class SubModel {
   }
 
   // receive external edges and return cells and internal edges
-  // externalEdges is { externalLeftEdge: [bools], externalRightEdge: [bools] }
+  // externalEdges is { externalTopEdge: [bools], externalBottomEdge: [bools] }
   // return { cells: {set of true indexes }, { leftEdge: [bools], rightEdge: [bools] }  };
   computeNext(externalEdges) {
     const cells = new Set();
 
-    const internalEdges = { leftEdge: [], rightEdge: [] };
+    const internalEdges = { topEdge: [], bottomEdge: [] };
     for (let row = this.row; row < this.row + this.rowCount; row++) {
       for (let col = this.col; col < this.col + this.colCount; col++) {
         const value = this.getCell(row, col);
@@ -33,13 +33,13 @@ export class SubModel {
 
         const nextValue = (liveNeighbors == 3) || (value && liveNeighbors == 2);
         if (nextValue) {
-          const key = row * this.parentColCount + col;
+          const key = row * this.colCount + col;
           cells.add(key)
         }
-        if (col == this.col) {
-          internalEdges.leftEdge.push(nextValue);
-        } else if (col == this.col + this.colCount - 1) {
-          internalEdges.rightEdge.push(nextValue);
+        if (row == this.row) {
+          internalEdges.topEdge.push(nextValue);
+        } else if (row == this.row + this.rowCount - 1) {
+          internalEdges.bottomEdge.push(nextValue);
         }
       }
     }
@@ -49,18 +49,16 @@ export class SubModel {
 
   livingNeighbors(row, col, externalEdges) {
     let result = 0;
-    const startRow = Math.max(0, row - 1);
-    const endRow = Math.min(this.rowCount - 1, row + 1);
+    const startCol = Math.max(0, col - 1);
+    const endCol = Math.min(this.colCount - 1, col + 1);
 
-    for (let r = startRow; r <= endRow; r++) {
-      for (let c = col - 1; c <= col + 1; c++) {
+    for (let r = row - 1; r <= row + 1; r++) {
+      for (let c = startCol; c <= endCol; c++) {
         let value;
-        if (c == -1 || c == this.parentColCount || r == -1 || r == this.rowCount) {
-          value = false;
-        } else if (c == this.col - 1) {
-          value = externalEdges.externalLeftEdge[r];
-        } else if (c == this.col + this.colCount) {
-          value = externalEdges.externalRightEdge[r];
+        if (r == this.row - 1) {
+          value = externalEdges.externalTopEdge[c] ?? false;
+        } else if (r == this.row + this.rowCount) {
+          value = externalEdges.externalBottomEdge[c] ?? false;
         } else {
           value = this.getCell(r, c);
         }

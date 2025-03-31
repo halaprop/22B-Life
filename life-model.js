@@ -1,5 +1,5 @@
 const kMaxSubmodels = 8;
-const kOptimalWidth = 20;
+const kOptimalHeight = 30;
 
 const workerScript = './life-worker.js';
 
@@ -8,46 +8,46 @@ export class LifeModel {
     this.rowCount = rowCount;
     this.colCount = colCount;
 
-    const submodelCount = Math.min(kMaxSubmodels, Math.ceil(colCount / kOptimalWidth));
-    const width = Math.floor(colCount / submodelCount);
-    let remainder = colCount % submodelCount;
+    const submodelCount = Math.min(kMaxSubmodels, Math.ceil(rowCount / kOptimalHeight));
+    const height = Math.floor(rowCount / submodelCount);
+    let remainder = rowCount % submodelCount;
 
-    console.log("submodel count", submodelCount, "approx size", { rowCount, width }, `${rowCount*width} cells each`);
+    console.log("submodel count", submodelCount, "approx size", { colCount, height }, `${colCount*height} cells each`);
 
     const submodels = [];
     const allCells = [];
     const allInternalEdges = [];
 
-    let subCol = 0;
+    let subRow = 0;
 
     for (let i = 0; i < submodelCount; i++) {
-      const subColCount = width + (remainder > 0 ? 1 : 0);
+      const subRowCount = height + (remainder > 0 ? 1 : 0);
       remainder--;
       const cells = new Set();
-      const leftEdge = [];
-      const rightEdge = [];
-      for (let row = 0; row < rowCount; row++) {
-        for (let col = subCol; col < subCol + subColCount; col++) {
+      const topEdge = [];
+      const bottomEdge = [];
+      for (let row = subRow; row < subRow + subRowCount; row++) {
+        for (let col = 0; col < colCount; col++) {
           const key = row * colCount + col;
           const value = sourceSet.has(key);
           if (value) {
             cells.add(key);
           }
-          if (col == subCol) {
-            leftEdge.push(value);
-          } else if (col == subCol + subColCount - 1) {
-            rightEdge.push(value);
+          if (row == subRow) {
+            topEdge.push(value);
+          } else if (row == subRow + subRowCount - 1) {
+            bottomEdge.push(value);
           }
         }
       }
-      allInternalEdges.push({ leftEdge, rightEdge });
+      allInternalEdges.push({ topEdge, bottomEdge });
       allCells.push(cells);
 
-      // submodel params are { row, col, rowCount, colCount, parentColCount, cells }
-      const params = { row: 0, col: subCol, rowCount, colCount: subColCount, parentColCount: colCount, cells }
+      // submodel params are { row, col, rowCount, colCount, cells }
+      const params = { row: subRow, col: 0, rowCount: subRowCount, colCount, cells };
       const submodel = new SubModelProxy(params);
       submodels.push(submodel);
-      subCol += subColCount;
+      subRow += subRowCount;
     }
     this.allInternalEdges = allInternalEdges;
     this.allCells = allCells;
@@ -101,9 +101,9 @@ export class LifeModel {
     try {
       const edges = this.allInternalEdges;
       const promises = this.submodels.map((submodel, i) => {
-        const externalLeftEdge = (i > 0) ? edges[i - 1].rightEdge : [];
-        const externalRightEdge = (i < this.submodels.length - 1) ? edges[i + 1].leftEdge : [];
-        return submodel.compute({ externalLeftEdge, externalRightEdge });
+        const externalTopEdge = (i > 0) ? edges[i - 1].bottomEdge : [];
+        const externalBottomEdge = (i < this.submodels.length - 1) ? edges[i + 1].topEdge : [];
+        return submodel.compute({ externalTopEdge, externalBottomEdge });
       });
 
       const result = await Promise.all(promises);
