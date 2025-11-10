@@ -33,7 +33,7 @@ export class FigureModal {
     if (!this.selectedItem) return;
 
     const filename = this.selectedItem.getAttribute("data-file");
-    const pathFilename = `/figures/${filename}`;
+    const pathFilename = `figures/${filename}`;
     try {
       let response = await fetch(pathFilename);
       if (!response.ok) {
