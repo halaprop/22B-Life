@@ -4,6 +4,8 @@ import { FigureModal } from "./figure-modal.js";
 import { LifeConsoleGrid } from "./life-console-grid.js";
 import { LifeModel } from "./life-model.js";
 
+const kPadding = 150; // cells of headroom around each figure; increase when sparse compute lands
+
 
 class LifeApp {
   constructor() {
@@ -40,18 +42,28 @@ class LifeApp {
   }
 
   async selectedFigure(builtInFigureModal) {
-    let model = await builtInFigureModal.fetchAndParse();
-    const gridParams = {
+    const model = await builtInFigureModal.fetchAndParse();
+    if (!model) return;
+
+    const worldRows = model.rowCount + kPadding * 2;
+    const worldCols = model.colCount + kPadding * 2;
+    const centeredCells = new Set([...model.cells].map(key => {
+      const row = Math.floor(key / model.colCount) + kPadding;
+      const col = (key % model.colCount) + kPadding;
+      return row * worldCols + col;
+    }));
+
+    this.grid = new LifeConsoleGrid({
       canvas: document.getElementById("main-canvas"),
-      rowCount: model.rowCount,
-      colCount: model.colCount,
-      backgroundDots: false
-    };
-    this.grid = new LifeConsoleGrid(gridParams);
+      rowCount: worldRows,
+      colCount: worldCols,
+      fitRowCount: model.rowCount,
+      fitColCount: model.colCount,
+    });
     if (this.lifeModel) {
       this.lifeModel.terminate();
     }
-    this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
+    this.lifeModel = new LifeModel(worldRows, worldCols, centeredCells);
     await this.lifeModel.init();
     this.playbackBtn.disabled = false;
     this.iteration = 0;
