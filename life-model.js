@@ -107,7 +107,7 @@ export class LifeModel {
       });
 
       const result = await Promise.all(promises);
-      this.allCells = result.map(obj => obj.cells);
+      this.allCells = result.map(obj => new Set(obj.cellsArray));
       this.allInternalEdges = result.map(obj => obj.internalEdges);
     } catch (error) {
       console.error('Error', error);

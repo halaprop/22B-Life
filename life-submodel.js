@@ -20,7 +20,7 @@ export class SubModel {
   }
 
   // externalEdges: { externalTopEdge: [bools], externalBottomEdge: [bools] }
-  // returns: { cells: Set, internalEdges: { topEdge: [bools], bottomEdge: [bools] } }
+  // returns: { cellsArray: Uint32Array, internalEdges: { topEdge: [bools], bottomEdge: [bools] } }
   computeNext(externalEdges) {
     const cells = new Set();
 
@@ -43,7 +43,8 @@ export class SubModel {
       }
     }
     this.cells = cells;
-    return { cells, internalEdges };
+    const cellsArray = new Uint32Array(cells);
+    return { cellsArray, internalEdges };
   }
 
   livingNeighbors(row, col, externalEdges) {

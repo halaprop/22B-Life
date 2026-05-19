@@ -16,7 +16,7 @@ self.onmessage = async (event) => {
                 throw new Error("Instance not created yet.");
             }
             const result = instance.computeNext(params);
-            postMessage({ status: 'ok', result });
+            postMessage({ status: 'ok', result }, [result.cellsArray.buffer]); // transfer ownership of buffer to main thread (zero-copy)
         } else {
             throw new Error("Unknown command");
         }
