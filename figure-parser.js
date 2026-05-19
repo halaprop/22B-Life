@@ -29,7 +29,7 @@ export function parse22B(string) {
 }
 
 export function parseConwayWiki(string) {
-  const lines = string.split('\n');
+  const lines = string.split('\n').filter(l => l.length > 0);
   if (!lines.length) return;
 
   let rowCount = 0, colCount = 0;
