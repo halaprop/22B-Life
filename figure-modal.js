@@ -8,7 +8,7 @@ export class FigureModal {
     this.items = document.querySelectorAll("#figure-list li");
 
     this.selection = null;
-    UIkit.util.on(modalID, "beforeshow", () => this.beforeShow);
+    UIkit.util.on(modalID, "beforeshow", () => this.beforeShow());
 
     this.items.forEach(item => {
       item.classList.add("uk-padding-small"); // Apply padding dynamically
