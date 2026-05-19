@@ -1,3 +1,4 @@
+import { modelFromString } from './figure-parser.js';
 
 export class FigureModal {
   // modalID must contain a <ul> with id #figure-list
@@ -53,70 +54,4 @@ export class FigureModal {
   }
 }
 
-
-/*****************************************************************************/
-/*****************************************************************************/
-// Parse functions
-
-function modelFromString(string, format) {
-  let params;
-
-  if (format == 'txt') {
-    params = parse22B(string)
-  } else {
-   params = parseConwayWiki(string)
-  }
-  return params;
-}
-
-function parse22B(string) {
-  let lines = string.split('\n');
-  if (!lines.length) return;
-
-  const dims = lines[0].split(' ');
-  const rowCount = parseInt(dims[0]);
-  const colCount = parseInt(dims[1]);
-  const cells = new Set();
-
-  lines = lines.slice(1);
-
-  for (let row = 0; row < lines.length; row++) {
-    let line = lines[row];
-    for (let col = 0; col < line.length; col++) {
-      if (line[col] == 'O') {
-        const key = row * colCount + col;
-        cells.add(key);
-      }
-    }
-  }
-  return { rowCount, colCount, cells };
-}
-
-function parseConwayWiki(string) {
-  let lines = string.split('\n');
-  if (!lines.length) return;
-
-  // first pass gets rowCount and colCount
-  let rowCount = 0, colCount = 0;
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-    if (line[0] == '!') continue;
-    rowCount++;
-    if (line.length > colCount) colCount = line.length;
-  }
-
-  const cells = new Set();
-
-  for (let row = 0; row < lines.length; row++) {
-    let line = lines[row];
-    if (line[0] == '!') continue;
-    for (let col = 0; col < line.length; col++) {
-      if (line[col] == 'O') {
-        const key = row * colCount + col;
-        cells.add(key);
-      }
-    }
-  }
-  return { rowCount, colCount, cells };
-}
 
