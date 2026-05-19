@@ -72,8 +72,7 @@ class LifeApp {
     while (this.isPlaying && runID == this.runID) {
       livingCellCount = lifeModel.draw(this.grid);
       this.updatePlaybackStats(livingCellCount);
-      await lifeModel.computeNext();
-      await this.sleep(this.sleepTimeout);
+      await Promise.all([lifeModel.computeNext(), this.sleep(this.sleepTimeout)]);
       this.iteration++;
     }
   }
