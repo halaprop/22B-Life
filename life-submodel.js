@@ -19,9 +19,8 @@ export class SubModel {
     return this.cells.has(key);
   }
 
-  // receive external edges and return cells and internal edges
-  // externalEdges is { externalTopEdge: [bools], externalBottomEdge: [bools] }
-  // return { cells: {set of true indexes }, { leftEdge: [bools], rightEdge: [bools] }  };
+  // externalEdges: { externalTopEdge: [bools], externalBottomEdge: [bools] }
+  // returns: { cells: Set, internalEdges: { topEdge: [bools], bottomEdge: [bools] } }
   computeNext(externalEdges) {
     const cells = new Set();
 

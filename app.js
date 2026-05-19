@@ -40,31 +40,27 @@ class LifeApp {
   }
 
   async selectedFigure(builtInFigureModal) {
-    try {
-      let model = await builtInFigureModal.fetchAndParse();
-      const gridParams = {
-        canvas: document.getElementById("main-canvas"),
-        rowCount: model.rowCount,
-        colCount: model.colCount,
-        backgroundDots: false
-      };
-      this.grid = new LifeConsoleGrid(gridParams);
-      if (this.lifeModel) {
-        this.lifeModel.terminate();
-      }
-      this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
-      await this.lifeModel.init();
-      this.playbackBtn.disabled = false;
-      this.iteration = 0;
-      this.runID++;
-      if (this.isPlaying) {
-        this.startPlaying();
-      } else {
-        const livingCellCount = this.lifeModel.draw(this.grid);
-        this.updatePlaybackStats(livingCellCount);
-      }
-    } catch (error) {
-      throw error;
+    let model = await builtInFigureModal.fetchAndParse();
+    const gridParams = {
+      canvas: document.getElementById("main-canvas"),
+      rowCount: model.rowCount,
+      colCount: model.colCount,
+      backgroundDots: false
+    };
+    this.grid = new LifeConsoleGrid(gridParams);
+    if (this.lifeModel) {
+      this.lifeModel.terminate();
+    }
+    this.lifeModel = new LifeModel(model.rowCount, model.colCount, model.cells);
+    await this.lifeModel.init();
+    this.playbackBtn.disabled = false;
+    this.iteration = 0;
+    this.runID++;
+    if (this.isPlaying) {
+      this.startPlaying();
+    } else {
+      const livingCellCount = this.lifeModel.draw(this.grid);
+      this.updatePlaybackStats(livingCellCount);
     }
   }
 
@@ -116,5 +112,4 @@ class LifeApp {
   }
 }
 
-console.log("window.navigator.hardwareConcurrency", window.navigator.hardwareConcurrency);
 new LifeApp();
