@@ -22,6 +22,7 @@ export class LifeConsoleGrid {
     this.offsetY = Math.floor((params.rowCount * this.cellSize - this.canvas.height) / 2);
 
     this._setupPan();
+    this._setupZoom();
     this.eraseAll();
   }
 
@@ -52,6 +53,29 @@ export class LifeConsoleGrid {
     this.canvas.addEventListener('mouseleave', stopDrag);
 
     this.canvas.style.cursor = 'grab';
+  }
+
+  _setupZoom() {
+    const kScrollThreshold = 100;
+    let wheelAccumulator = 0;
+
+    this.canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      wheelAccumulator += e.deltaY;
+      if (Math.abs(wheelAccumulator) < kScrollThreshold) return;
+      const delta = wheelAccumulator < 0 ? 1 : -1;
+      wheelAccumulator = 0;
+
+      const newCellSize = Math.max(kMinCellSize, Math.min(kMaxCellSize, this.cellSize + delta));
+      if (newCellSize === this.cellSize) return;
+
+      // keep the world position under the cursor fixed after resize
+      const worldX = (e.offsetX + this.offsetX) / this.cellSize;
+      const worldY = (e.offsetY + this.offsetY) / this.cellSize;
+      this.cellSize = newCellSize;
+      this.offsetX = Math.round(worldX * this.cellSize - e.offsetX);
+      this.offsetY = Math.round(worldY * this.cellSize - e.offsetY);
+    }, { passive: false });
   }
 
   drawSet(set) {
