@@ -4,7 +4,7 @@ import { FigureModal } from "./figure-modal.js";
 import { LifeConsoleGrid } from "./life-console-grid.js";
 import { LifeModel } from "./life-model.js";
 
-const kPadding = 150; // cells of headroom around each figure; increase when sparse compute lands
+const kPadding = 1000;
 
 
 class LifeApp {
