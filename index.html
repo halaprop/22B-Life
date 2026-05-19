@@ -34,6 +34,15 @@
       background-color: #505050;
     }
 
+    #pattern-title {
+      height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      line-height: 1.3;
+    }
+
     /* Main content area */
     .main-container {
       flex: 1;
@@ -69,9 +78,15 @@
     <div class="uk-navbar-left uk-light">
       <span class="uk-navbar-item uk-logo uk-margin-left">Game of Life</span>
     </div>
+    <div class="uk-navbar-center uk-light">
+      <div id="pattern-title">
+        <div id="pattern-name"></div>
+        <div id="pattern-note" class="uk-text-small uk-text-muted"></div>
+      </div>
+    </div>
     <div class="uk-navbar-right uk-margin-right">
       <button class="uk-button uk-button-default uk-light" type="button"
-        uk-toggle="target: #built-in-modal">Figures</button>
+        uk-toggle="target: #browse-modal">Figures</button>
     </div>
   </nav>
 
@@ -98,24 +113,13 @@
     <span id="fpsEl" class="running-stat uk-margin-left"></span>
   </div>
 
-  <div id="built-in-modal" uk-modal>
+<div id="browse-modal" uk-modal>
     <div class="uk-modal-dialog uk-modal-body">
-      <h2 class="uk-modal-title uk-text-center">Select a Figure</h2>
-
-      <!-- figures -->
-      <ul class="uk-list uk-list-divider uk-text-center" id="figure-list">
-        <li data-file="basic-figures.txt">Basic Figures</li>
-        <li data-file="burst.txt">Burst</li>
-        <li data-file="canada-goose.txt">Canada Goose</li>
-        <li data-file="glider-gun.txt">Glider Gun</li>
-        <li data-file="queen-bee.txt">Queen Bee</li>
-        <li data-file="rpent.txt">R-pent</li>
-        <li data-file="breeder1.cells">Gosper's Breeder</li>
-      </ul>
-
+      <h2 class="uk-modal-title uk-text-center">Browse Patterns</h2>
+      <ul id="browse-accordion" uk-accordion="multiple: true"></ul>
       <div class="uk-modal-footer uk-text-right">
         <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-        <button class="uk-button uk-button-primary" type="button" id="run-figure">Run</button>
+        <button class="uk-button uk-button-primary" type="button" id="run-browse">Run</button>
       </div>
     </div>
   </div>

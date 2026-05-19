@@ -12,6 +12,8 @@ class LifeApp {
     this.iterationEl = document.getElementById("iteration-counter");
     this.livingCellsEl = document.getElementById("living-cells-counter");
     this.fpsEl = document.getElementById('fpsEl');
+    this.patternNameEl = document.getElementById("pattern-name");
+    this.patternNoteEl = document.getElementById("pattern-note");
     this.playbackBtn = document.getElementById('playback-btn');
     this.playbackIcon = this.playbackBtn.querySelector("i");
 
@@ -22,9 +24,10 @@ class LifeApp {
     this.lastFrameTime = performance.now();
     this.sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-    const figureModal = new FigureModal("#built-in-modal");
-    figureModal.runButton.addEventListener('click', async () => {
-      this.selectedFigure(figureModal);
+    const browseModal = new FigureModal("#browse-modal");
+    browseModal.runButton.addEventListener('click', async () => {
+      const model = await browseModal.fetchAndParse();
+      this.loadAndRun(model);
     });
 
     this.playbackBtn.disabled = true;
@@ -41,9 +44,10 @@ class LifeApp {
     });
   }
 
-  async selectedFigure(builtInFigureModal) {
-    const model = await builtInFigureModal.fetchAndParse();
+  async loadAndRun(model) {
     if (!model) return;
+    this.patternNameEl.textContent = model.name || '';
+    this.patternNoteEl.textContent = model.note || '';
 
     const worldRows = model.rowCount + kPadding * 2;
     const worldCols = model.colCount + kPadding * 2;

@@ -1,9 +1,9 @@
 export function modelFromString(string, format) {
-  if (format === 'txt') {
-    return parse22B(string);
-  } else {
-    return parseConwayWiki(string);
-  }
+  if (format === 'txt') return parse22B(string);
+  if (format === 'cells') return parseConwayWiki(string);
+  if (format === 'rle') return parseRLE(string);
+  // auto-detect pasted content: RLE has an "x = N" header line
+  return /x\s*=/.test(string) ? parseRLE(string) : parseConwayWiki(string);
 }
 
 export function parse22B(string) {
@@ -22,6 +22,44 @@ export function parse22B(string) {
     for (let col = 0; col < line.length; col++) {
       if (line[col] === 'O') {
         cells.add(row * colCount + col);
+      }
+    }
+  }
+  return { rowCount, colCount, cells };
+}
+
+export function parseRLE(string) {
+  const lines = string.split('\n').filter(l => l.trim().length > 0);
+
+  let i = 0;
+  while (i < lines.length && lines[i][0] === '#') i++;
+  if (i >= lines.length) return null;
+
+  const header = lines[i++];
+  const xMatch = header.match(/x\s*=\s*(\d+)/);
+  const yMatch = header.match(/y\s*=\s*(\d+)/);
+  if (!xMatch || !yMatch) return null;
+
+  const colCount = parseInt(xMatch[1]);
+  const rowCount = parseInt(yMatch[1]);
+  const data = lines.slice(i).join('').split('!')[0];
+
+  const cells = new Set();
+  let row = 0, col = 0, runStr = '';
+
+  for (const ch of data) {
+    if (ch >= '0' && ch <= '9') {
+      runStr += ch;
+    } else {
+      const count = runStr ? parseInt(runStr) : 1;
+      runStr = '';
+      if (ch === 'b') {
+        col += count;
+      } else if (ch === 'o') {
+        for (let k = 0; k < count; k++) cells.add(row * colCount + col++);
+      } else if (ch === '$') {
+        row += count;
+        col = 0;
       }
     }
   }

@@ -9,12 +9,7 @@ export class SubModel {
     return row * this.colCount + col;
   }
 
-  setCell(row, col, state) {
-    const key = this.key(row, col);
-    state ? this.cells.add(key) : this.cells.delete(key);
-  }
-
-  getCell(row, col) {
+getCell(row, col) {
     const key = this.key(row, col);
     return this.cells.has(key);
   }
